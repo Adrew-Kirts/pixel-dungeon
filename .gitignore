@@ -1,0 +1,8 @@
+.superpowers/
+.DS_Store
+node_modules/
+dist/
+.deploy.env
+scripts/art/poster-phone.local.txt
+__pycache__/
+docs/superpowers/

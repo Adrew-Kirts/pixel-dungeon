@@ -1,0 +1,37 @@
+name: strikwerda_api
+
+services:
+  api:
+    image: node:24-alpine
+    container_name: strikwerda_api
+    working_dir: /app
+    command: ["node", "--disable-warning=ExperimentalWarning", "api/main.js"]
+    user: "1000:1000"
+    env_file: .env
+    environment:
+      DB_PATH: /data/strikwerda.db
+      PORT: "8080"
+      ORIGIN: https://strikwerda.fr
+    volumes:
+      - ./app:/app:ro
+      - strikwerda_api_data:/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 256m
+    pids_limit: 64
+    restart: unless-stopped
+    networks:
+      - caddy_caddy_network
+
+volumes:
+  strikwerda_api_data:
+    external: true
+
+networks:
+  caddy_caddy_network:
+    external: true
