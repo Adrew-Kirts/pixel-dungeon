@@ -18,6 +18,7 @@
     <link rel="icon" type="image/png" href="assets/favicon.png" />
     <link rel="apple-touch-icon" href="assets/favicon.png" />
     <link rel="preload" href="assets/fonts/pixelify-sans.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="assets/fonts/tiny5.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="styles.css" />
     <script>
       document.documentElement.classList.replace('no-js', 'js');
@@ -79,7 +80,8 @@
           <p class="banner-title" data-role="title"></p>
           <p class="banner-subtitle" data-role="subtitle"></p>
         </div>
-        <p id="caption" class="caption" hidden aria-live="polite"></p>
+        <div id="speech" class="speech" hidden aria-live="polite"><p class="speech-name" data-role="name"></p><p class="speech-text" data-role="text"></p></div>
+        <p id="flash-word" class="flash-word" hidden aria-hidden="true"></p>
         <div id="hint" class="hint" hidden></div>
         <div id="meter" class="meter" hidden>
           <div class="meter-track">
@@ -94,13 +96,21 @@
       <section id="results" class="results" hidden aria-live="polite">
         <div class="results-inner" data-role="content"></div>
       </section>
+      <div id="lang-picker" class="lang-picker" hidden>
+        <div class="lang-card" role="group" aria-label="Language / Langue">
+          <div class="lang-options">
+            <button class="lang-option" type="button" data-lang="en" data-flag="langEN"><span class="px-icon"></span><span class="lang-name">English</span></button>
+            <button class="lang-option" type="button" data-lang="fr" data-flag="langFR"><span class="px-icon"></span><span class="lang-name">Français</span></button>
+          </div>
+          <div class="auto-bar"><span class="auto-bar-fill"></span></div>
+        </div>
+      </div>
       <div id="boot" class="boot" hidden><pre aria-hidden="true"></pre><p class="boot-skip" data-i18n="boot.skip">tap to skip</p></div>
       <nav id="corner" class="corner" aria-label="Game controls">
         <button id="mute" class="corner-button" type="button" aria-pressed="false" aria-label="Mute sound">
           <svg class="icon-sound" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6h3l4-3v10l-4-3H2z" /><path class="waves" d="M11 5h1v1h1v4h-1v1h-1v-1h1V6h-1z" /></svg>
           <svg class="icon-muted" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6h3l4-3v10l-4-3H2z" /><path d="M11 6h1v1h1V6h1v1h-1v1h1v1h-1V8h-1v1h-1V8h1V7h-1z" /></svg>
         </button>
-        <button id="lang" class="corner-button corner-lang" type="button" data-i18n="lang.toggle" data-i18n-attr="aria-label: lang.label">FR</button>
         <a id="skip" class="corner-button corner-skip" href="#treasure"><span data-i18n="skip">Skip</span> <span aria-hidden="true">▸</span></a>
       </nav>
       <p id="announcer" class="sr-only" aria-live="polite"></p>
@@ -117,6 +127,7 @@
           <h1 class="treasure-title">Ezra</h1>
           <p class="treasure-tagline" data-i18n="treasure.tagline">Developer based in Annecy</p>
           <p class="run-badge" data-role="run-badge" hidden></p>
+          <button id="scroll-hint" class="scroll-hint" type="button" hidden><span class="scroll-arrow" aria-hidden="true">▼</span><span data-i18n="treasure.scrollHint">Scroll down to enter the real dungeon</span><span class="scroll-arrow" aria-hidden="true">▼</span></button>
         </header>
 
         <section class="treasure-section" aria-labelledby="featured-title">
@@ -178,10 +189,12 @@
 
         <footer class="treasure-footer">
           <p data-i18n="treasure.credits">Sprites: Tiny Dungeon by Kenney (CC0) · Font: Pixelify Sans (OFL) · © 2026 Ezra</p>
-          <p><a href="https://github.com/Adrew-Kirts/pixel-dungeon" target="_blank" rel="noopener" data-i18n="treasure.source">Source code of this site ↗</a></p>
+          <p><a href="https://github.com/Adrew-Kirts/pixel-dungeon" target="_blank" rel="noopener" data-i18n="treasure.source">Source code of this site ↗</a> · <button id="lang-switch" class="text-button" type="button" data-i18n="lang.switch">Version française</button></p>
         </footer>
       </div>
     </main>
+
+    <dialog id="stats-dialog" class="stats-dialog" aria-label="Dungeon stats"><form method="dialog" class="stats-close-form"><button class="stats-close" type="submit" aria-label="Close">✕</button></form><div class="stats-inner" data-role="content"></div></dialog>
 
     <p id="toast" class="toast" role="status" hidden></p>
 

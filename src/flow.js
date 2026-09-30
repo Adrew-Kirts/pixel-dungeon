@@ -1,5 +1,6 @@
 import { t, foeName, foeLine, heroName } from './i18n.js';
 import { createEasyRun } from './easy/engine.js';
+import { rankFor } from './rules.js';
 import { resetWorld } from './stage/world.js';
 import { boot } from './scenes/boot.js';
 import { heroScene } from './scenes/hero.js';
@@ -52,6 +53,7 @@ export function createFlow(game, treasure, onError) {
     if (current !== token) return;
     const run = createEasyRun(seedInfo.seed);
     run.server = seedInfo.server;
+    if (run.server !== null) game.api.event('easy.start');
     game.run = run;
     const { world, hud } = game;
     await heroScene(game, run);
@@ -70,6 +72,10 @@ export function createFlow(game, treasure, onError) {
     if ((await battle(game, run, run.dragon, world.foe)) === 'lost') return lose(run, current);
     run.stats.endedAt = performance.now();
     game.lastEasy = run.server === null ? null : { runId: run.server.runId, token: run.server.token, strikes: [...run.strikes], hero: run.hero, at: run.server.issuedAt };
+    if (run.server !== null) {
+      game.api.event('easy.win');
+      game.api.event(`easy.rank.${rankFor(run.stats.crits, run.stats.strikes)}`);
+    }
     const summary = await victory(game, run);
     if (current !== token) return;
     token++;
@@ -79,6 +85,7 @@ export function createFlow(game, treasure, onError) {
 
   async function lose(run, current) {
     game.lastEasy = null;
+    if (run.server !== null) game.api.event('easy.lose');
     const choice = await defeat(game, run);
     if (current !== token) return;
     if (choice === 'retry') {

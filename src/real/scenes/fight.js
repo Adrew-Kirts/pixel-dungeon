@@ -18,7 +18,7 @@ export function setupFoeActor(scene, foe) {
   const actor = scene.game.world.foe;
   const stage = scene.stage.state;
   stage.monolith = false;
-  Object.assign(stage.boss, { power: 0, charge: 0, lash: 0, laser: null, enraged: false });
+  Object.assign(stage.boss, { power: 0, charge: 0, lash: 0, laser: null, enraged: false, talking: false });
   if (foe.kind === 'monster') {
     Object.assign(actor, ACTOR_RESET, { key: `tile:${TILES[foe.id] ?? 104}`, targetAnchor: 0.7, height: 16, shadow: 6 });
   } else if (foe.kind === 'midboss') {
@@ -73,6 +73,23 @@ function heroFirstName(scene) {
   return scene.state.hero.firstName ?? heroName(scene.state.hero);
 }
 
+async function speak(scene, text, holdMs = 1600) {
+  const { game } = scene;
+  const { hud, scheduler, audio, view } = game;
+  const boss = scene.stage.state.boss;
+  const geometry = scene.stage.monolith(view, game.world.foe);
+  hud.speech.show(t('boss.speaker'), geometry.eyeX - 14, geometry.eyeY - 6);
+  boss.talking = true;
+  for (let index = 1; index <= text.length; index++) {
+    hud.speech.text(text.slice(0, index));
+    if (index % 2 === 1 && text[index - 1] !== ' ') audio.sfx.voice();
+    await scheduler.wait(text[index - 1] === '.' || text[index - 1] === '?' || text[index - 1] === '!' ? 140 : 32);
+  }
+  boss.talking = false;
+  await scheduler.wait(holdMs);
+  hud.speech.hide();
+}
+
 async function monolithIntro(scene, foe) {
   const { game } = scene;
   const { hud, scheduler, audio, camera, effects, view } = game;
@@ -106,8 +123,8 @@ async function monolithIntro(scene, foe) {
   hud.announce(t('announce.boss', { name: foeName(foe), title: t(`foe.${foe.id}.title`), hp: foe.maxHp }));
   await scheduler.wait(1500);
   hud.hideBanner();
-  hud.caption(t('boss.hal.intro', { name: heroFirstName(scene) }), 2600);
-  await scheduler.wait(2400);
+  await speak(scene, t('boss.intro1'), 1100);
+  await speak(scene, t('boss.intro2', { name: heroFirstName(scene) }), 1900);
   hud.showBoss(bossInfo(foe));
   await scheduler.wait(300);
 }
@@ -254,7 +271,8 @@ export async function grow(scene, event) {
 export async function enraged(scene) {
   if (scene.foe !== null && scene.foe.kind === 'boss') {
     scene.stage.state.boss.enraged = true;
-    scene.game.hud.caption(t('boss.hal.enrage', { name: heroFirstName(scene) }), 2200);
+    await Promise.all([speak(scene, t('boss.enrage'), 1300), enrage(scene.game, scene.foe, scene.game.world.foe)]);
+    return;
   }
   await enrage(scene.game, scene.foe, scene.game.world.foe);
 }
@@ -266,7 +284,7 @@ async function monolithDeath(scene) {
   const boss = scene.stage.state.boss;
   camera.flash('#ffffff', 0.8, 380);
   audio.sfx.boom();
-  hud.caption(t('boss.hal.death'), 2600);
+  const words = speak(scene, t('boss.death'), 900);
   for (let flicker = 0; flicker < 8; flicker++) {
     boss.power = flicker % 2 === 0 ? 0.25 : 0.8 - flicker * 0.08;
     actor.flash = flicker % 2 === 0 ? 0.6 : 0;
@@ -274,6 +292,7 @@ async function monolithDeath(scene) {
   }
   actor.flash = 0;
   audio.sfx.powerDown();
+  await words;
   await scheduler.tween(boss, { power: 0 }, 700, 'inQuad');
   camera.setTint('#e43b44', 0);
   hud.setEnraged(false);
@@ -316,6 +335,7 @@ export async function kill(scene, event) {
 export async function roomClear(scene, event) {
   const { game } = scene;
   game.hud.hint(null);
+  scene.stage.state.trapArmed = false;
   if (event.flawless === true) {
     const head = top(game, game.world.hero);
     game.hud.floatText(head.x, head.y - 8, t('float.flawless', { points: event.points }), 'label-crit');

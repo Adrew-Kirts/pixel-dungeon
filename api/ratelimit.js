@@ -12,6 +12,10 @@ export function createRateLimiter({ limit, windowMs, now = Date.now }) {
       hits.set(key, recent);
       return true;
     },
+    blocked(key) {
+      const time = now();
+      return (hits.get(key) ?? []).filter((at) => time - at < windowMs).length >= limit;
+    },
     sweep() {
       const time = now();
       for (const [key, list] of hits) {

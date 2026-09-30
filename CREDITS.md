@@ -12,6 +12,11 @@ License: Creative Commons Zero, CC0 — http://creativecommons.org/publicdomain/
 `assets/fonts/pixelify-sans.woff2` — Copyright 2021 The Pixelify Sans Project Authors
 (https://github.com/eifetx/Pixelify-Sans). SIL Open Font License 1.1, full text in `assets/fonts/OFL.txt`.
 
+## Tiny5
+
+`assets/fonts/tiny5.woff2` (used for digits only) — Copyright 2024 The tiny5 Project Authors
+(https://github.com/Gissio/font_tiny5). SIL Open Font License 1.1, full text in `assets/fonts/OFL-tiny5.txt`.
+
 ## Original game
 
 Remaster of the 2023 Java console school project https://github.com/Adrew-Kirts/Dungeons_and_Dragons.

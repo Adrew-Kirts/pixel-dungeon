@@ -25,6 +25,10 @@ export function createStore(path) {
       created_at INTEGER NOT NULL
     );
     CREATE INDEX IF NOT EXISTS results_board ON results (score DESC) WHERE initials IS NOT NULL;
+    CREATE TABLE IF NOT EXISTS counters (
+      name TEXT PRIMARY KEY,
+      value INTEGER NOT NULL
+    );
   `);
   const statements = {
     createRun: db.prepare('INSERT INTO runs (id, mode, seed, issued_at) VALUES (?, ?, ?, ?)'),
@@ -41,8 +45,23 @@ export function createStore(path) {
     boardCount: db.prepare('SELECT COUNT(*) AS count FROM results WHERE initials IS NOT NULL'),
     fifth: db.prepare('SELECT score FROM results WHERE initials IS NOT NULL ORDER BY score DESC, created_at ASC LIMIT 1 OFFSET 4'),
     deleteResult: db.prepare('DELETE FROM results WHERE share_id = ?'),
+    increment: db.prepare('INSERT INTO counters (name, value) VALUES (?, ?) ON CONFLICT (name) DO UPDATE SET value = value + excluded.value'),
+    counters: db.prepare('SELECT name, value FROM counters'),
+    best: db.prepare('SELECT score, initials, outcome FROM results ORDER BY score DESC, created_at ASC LIMIT 1'),
     listResults: db.prepare('SELECT share_id, initials, score, outcome, hero_name, created_at FROM results WHERE initials IS NOT NULL ORDER BY score DESC LIMIT ?'),
   };
+  if (db.prepare("SELECT value FROM counters WHERE name = 'meta.backfilled'").get() === undefined) {
+    const totals = db.prepare("SELECT COUNT(*) AS finished, COALESCE(SUM(CASE WHEN outcome = 'victory' THEN 1 ELSE 0 END), 0) AS victories, COALESCE(SUM(score), 0) AS score FROM results").get();
+    const finished = Number(totals.finished);
+    const victories = Number(totals.victories);
+    statements.increment.run('meta.backfilled', 1);
+    if (finished > 0) {
+      statements.increment.run('real.finished', finished);
+      if (victories > 0) statements.increment.run('real.victory', victories);
+      if (finished - victories > 0) statements.increment.run('real.gameover', finished - victories);
+      statements.increment.run('real.score', Number(totals.score));
+    }
+  }
   const toRun = (row) =>
     row === undefined
       ? null
@@ -103,6 +122,18 @@ export function createStore(path) {
     },
     listResults(limit) {
       return statements.listResults.all(limit);
+    },
+    incrementCounters(increments) {
+      for (const [name, value] of Object.entries(increments)) {
+        if (Number.isFinite(value) === true && value !== 0) statements.increment.run(name, Math.round(value));
+      }
+    },
+    counters() {
+      return Object.fromEntries(statements.counters.all().filter((row) => row.name.startsWith('meta.') === false).map((row) => [row.name, Number(row.value)]));
+    },
+    bestResult() {
+      const row = statements.best.get();
+      return row === undefined ? null : { score: Number(row.score), initials: row.initials, outcome: row.outcome };
     },
     close() {
       db.close();

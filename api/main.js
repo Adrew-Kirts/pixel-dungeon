@@ -23,7 +23,7 @@ const thresholds = {
 };
 
 const store = createStore(process.env.DB_PATH ?? '/data/strikwerda.db');
-const server = createServer({ store, secret, config: { thresholds, origin: process.env.ORIGIN ?? 'https://strikwerda.fr' } });
+const server = createServer({ store, secret, config: { thresholds, origin: process.env.ORIGIN ?? 'https://strikwerda.fr', statsKey: process.env.STATS_KEY ?? null } });
 const port = numberFromEnv('PORT', 8080);
 
 server.requestTimeout = 15000;

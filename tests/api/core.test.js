@@ -1,4 +1,6 @@
 import { test } from 'node:test';
+import { rmSync } from 'node:fs';
+import { DatabaseSync } from 'node:sqlite';
 import assert from 'node:assert/strict';
 import { sign, verify } from '../../api/tokens.js';
 import { createStore } from '../../api/store.js';
@@ -150,4 +152,26 @@ test('near-perfect human players are never flagged as bots', () => {
     }
     assert.equal(flagged, 0, `${JSON.stringify(profile)} flagged ${flagged}/400`);
   }
+});
+
+test('counters are backfilled once from results stored before counters existed', () => {
+  const path = `/tmp/strikwerda-backfill-${process.pid}.db`;
+  const first = createStore(path);
+  first.insertResult({ shareId: 'aaaaaa', runId: 'run-a', score: 1000, breakdown: '[]', outcome: 'victory', heroClass: 'warrior', heroName: 'A', foeName: 'THE LEGACY MONOLITH', qualifies: true, createdAt: 1 });
+  first.insertResult({ shareId: 'bbbbbb', runId: 'run-b', score: 500, breakdown: '[]', outcome: 'gameover', heroClass: 'wizard', heroName: 'B', foeName: 'Giant', qualifies: true, createdAt: 2 });
+  first.close();
+  const legacy = new DatabaseSync(path);
+  legacy.exec('DROP TABLE counters');
+  legacy.close();
+  const second = createStore(path);
+  assert.deepEqual(
+    { finished: second.counters()['real.finished'], victory: second.counters()['real.victory'], gameover: second.counters()['real.gameover'], score: second.counters()['real.score'] },
+    { finished: 2, victory: 1, gameover: 1, score: 1500 },
+  );
+  second.incrementCounters({ 'real.finished': 1 });
+  second.close();
+  const third = createStore(path);
+  assert.equal(third.counters()['real.finished'], 3);
+  third.close();
+  rmSync(path, { force: true });
 });

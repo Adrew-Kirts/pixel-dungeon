@@ -41,7 +41,7 @@ function planRooms(streams) {
   return ROOM_PLAN.map((kind) => {
     if (kind === 'fight') {
       fights += 1;
-      const size = fights === 3 ? lastFightSize : 1;
+      const size = fights === 4 ? lastFightSize : 1;
       return { kind, monsters: Array.from({ length: size }, monster) };
     }
     if (kind === 'genie') {
@@ -514,9 +514,10 @@ function startAim(state, events) {
   const count = Math.floor(WEAK_SPOT.timeoutMs / WAYPOINT_STEP_MS) + 3;
   const eyeFirst = 1 + rng.int(0, 1);
   const eyeSecond = 4 + rng.int(0, 1);
+  const eyeThird = 7 + rng.int(0, 1);
   const waypoints = [];
   for (let index = 0; index < count; index++) {
-    if (index === eyeFirst || index === eyeSecond) {
+    if (index === eyeFirst || index === eyeSecond || index === eyeThird) {
       waypoints.push({ x: eye.x, y: eye.y });
       continue;
     }

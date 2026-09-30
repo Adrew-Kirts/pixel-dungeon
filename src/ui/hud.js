@@ -22,8 +22,11 @@ export function createHud({ getView }) {
   const hint = $('#hint');
   const fx = $('#fx');
   const announcer = $('#announcer');
-  const caption = $('#caption');
-  let captionTimer = 0;
+  const speech = $('#speech');
+  const flashWord = $('#flash-word');
+  let flashTimer = 0;
+  const speechName = speech.querySelector('[data-role="name"]');
+  const speechText = speech.querySelector('[data-role="text"]');
   const scoreHud = $('#score-hud');
   const scoreValue = scoreHud.querySelector('[data-role="value"]');
   const scoreRoom = scoreHud.querySelector('[data-role="room"]');
@@ -216,7 +219,7 @@ export function createHud({ getView }) {
       element.style.left = `${clampCenter(center, element.offsetWidth, fx.clientWidth)}px`;
       const remove = () => element.remove();
       element.addEventListener('animationend', remove, { once: true });
-      setTimeout(remove, 2400);
+      setTimeout(remove, 3200);
     },
     banner(title, subtitle) {
       clearTimeout(bannerTimer);
@@ -256,23 +259,52 @@ export function createHud({ getView }) {
     announce(text) {
       announcer.textContent = text;
     },
-    caption(text, ms = 2400) {
-      clearTimeout(captionTimer);
-      caption.textContent = text;
-      caption.hidden = false;
-      caption.classList.remove('is-typing');
-      void caption.offsetWidth;
-      caption.classList.add('is-typing');
-      caption.style.setProperty('--chars', String(text.length));
-      captionTimer = setTimeout(() => {
-        caption.hidden = true;
+    flashWord(text, ms = 700) {
+      clearTimeout(flashTimer);
+      flashWord.textContent = text;
+      flashWord.hidden = false;
+      flashWord.classList.remove('is-popping');
+      void flashWord.offsetWidth;
+      flashWord.classList.add('is-popping');
+      flashTimer = setTimeout(() => {
+        flashWord.hidden = true;
       }, ms);
+    },
+    speech: {
+      show(name, anchorX, anchorY) {
+        const view = getView();
+        const point = toScreen(view, anchorX, anchorY);
+        speechName.textContent = name;
+        speechText.textContent = '';
+        const space = point.left - 22;
+        const below = space < 170;
+        speech.classList.toggle('is-below', below);
+        const width = below === true ? Math.min(320, fx.clientWidth - 32) : Math.min(340, space - 8);
+        speech.style.width = `${width}px`;
+        speech.hidden = false;
+        if (below === true) {
+          speech.style.left = `${Math.max(16, Math.min(fx.clientWidth - width - 16, point.left - width / 2))}px`;
+          speech.style.top = `${point.top + 18}px`;
+          speech.style.setProperty('--tail-x', `${Math.max(20, Math.min(width - 20, point.left - Number.parseFloat(speech.style.left)))}px`);
+        } else {
+          const hudBottom = document.getElementById('hud-top').getBoundingClientRect().bottom;
+          speech.style.left = `${point.left - 22 - width}px`;
+          speech.style.top = `${Math.max(hudBottom + 10, point.top - 40)}px`;
+        }
+      },
+      text(value) {
+        speechText.textContent = value;
+      },
+      hide() {
+        speech.hidden = true;
+      },
     },
     reset() {
       clearTimeout(panelTimer);
       clearTimeout(bannerTimer);
-      clearTimeout(captionTimer);
-      caption.hidden = true;
+      speech.hidden = true;
+      clearTimeout(flashTimer);
+      flashWord.hidden = true;
       for (const element of [heroCard, foeCard, bossBar, progress, meterElement, banner, panel, hint, scoreHud]) element.hidden = true;
       heroCard.querySelector('[data-role="potion"]').dataset.count = '';
       panel.replaceChildren();

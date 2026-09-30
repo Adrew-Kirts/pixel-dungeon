@@ -70,9 +70,10 @@ export function validateRealRun({ realSeed, easy, inputs, elapsedMs, thresholds 
   if (Array.isArray(inputs) === false || inputs.length === 0 || inputs.length > MAX_INPUTS) throw new ValidationError('inputs');
   const easyHero = easy === null ? null : rebuildEasyHero(easy);
   const state = createRealRun({ seed: realSeed, easyHero });
+  const events = [...state.initialEvents];
   for (const raw of inputs) {
     try {
-      apply(state, sanitize(raw));
+      events.push(...apply(state, sanitize(raw)));
     } catch (error) {
       if (error instanceof InputError || error instanceof ValidationError) throw new ValidationError('inputs');
       throw error;
@@ -80,6 +81,6 @@ export function validateRealRun({ realSeed, easy, inputs, elapsedMs, thresholds 
   }
   if (state.phase !== 'done') throw new ValidationError('unfinished');
   if (elapsedMs < state.gameMs * 0.9) throw new ValidationError('too_fast');
-  if (botCheck(state, thresholds) === true) return { human: false, state };
-  return { human: true, state, score: finalScore(state) };
+  if (botCheck(state, thresholds) === true) return { human: false, state, events };
+  return { human: true, state, events, score: finalScore(state) };
 }

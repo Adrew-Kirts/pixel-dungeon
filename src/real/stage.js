@@ -54,11 +54,12 @@ export function createRealStage() {
   const state = {
     decor: [],
     alarm: false,
+    trapArmed: false,
     monolith: false,
-    boss: { power: 1, charge: 0, lash: 0, laser: null, enraged: false },
+    boss: { power: 1, charge: 0, lash: 0, laser: null, enraged: false, talking: false },
     target: null,
     lamp: createActor({ key: 'icon:lamp', anchor: 0.68, idle: false, shadow: 6, height: 9 }),
-    genie: createActor({ key: genieFrame, anchor: 0.68, idle: true, shadow: 0, height: 26, alpha: 0 }),
+    genie: createActor({ key: genieFrame, anchor: 0.68, idle: true, shadow: 0, height: 32, alpha: 0 }),
     arrow: createActor({ key: 'icon:arrow', idle: false, shadow: 0, height: 5 }),
     poisoned: false,
   };
@@ -217,7 +218,7 @@ export function createRealStage() {
     ctx.restore();
     const power = state.boss.power;
     if (power > 0) {
-      const pulse = 0.85 + 0.15 * Math.sin(now / (state.boss.enraged === true ? 90 : 320));
+      const pulse = state.boss.talking === true ? 0.75 + 0.35 * Math.abs(Math.sin(now / 70)) : 0.85 + 0.15 * Math.sin(now / (state.boss.enraged === true ? 90 : 320));
       const radius = (18 + state.boss.charge * 26) * pulse;
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
@@ -280,8 +281,13 @@ export function createRealStage() {
 
   return {
     state,
-    hiddenRanges() {
-      return state.decor.filter((item) => item.kind === 'poster').map((item) => [item.worldX - 44, item.worldX + 44]);
+    hiddenRanges(view, camX) {
+      const ranges = state.decor.filter((item) => item.kind === 'poster').map((item) => [item.worldX - 44, item.worldX + 44]);
+      if (state.lamp.visible === true) {
+        const worldX = camX + actorX(view, state.lamp);
+        ranges.push([worldX - 34, worldX + 34]);
+      }
+      return ranges;
     },
     addDecor(kind, worldX) {
       state.decor.push({ kind, worldX });
@@ -316,16 +322,35 @@ export function createRealStage() {
     },
     drawOverlay(ctx, view, world, now, k) {
       const slit = lastSlit();
+      if (state.trapArmed === true && slit !== null) {
+        const x = slit.worldX - world.camX;
+        const y = view.groundY - 9;
+        const glow = state.alarm === true ? 1 : 0.35 + 0.25 * Math.sin(now / 260);
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        const gradient = ctx.createRadialGradient(x, y, 0, x, y, state.alarm === true ? 22 : 12);
+        gradient.addColorStop(0, `rgba(255, 112, 109, ${0.9 * glow})`);
+        gradient.addColorStop(1, 'rgba(228, 59, 68, 0)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(x - 24, y - 24, 48, 48);
+        ctx.restore();
+        const heroX = actorX(view, world.hero) + 8;
+        ctx.globalAlpha = state.alarm === true ? 0.9 : 0.35 + 0.15 * Math.sin(now / 260);
+        ctx.fillStyle = '#e43b44';
+        const dash = Math.floor(now / 90) % 6;
+        for (let dx = x - 7 - dash; dx > heroX; dx -= 6) ctx.fillRect(snap(dx - 3, k), snap(y, k), 3, 1);
+        ctx.globalAlpha = 1;
+      }
       if (state.alarm === true && slit !== null) {
         const x = snap(slit.worldX - world.camX, k);
-        const y = snap(view.groundY - 30 - (Math.floor(now / 80) % 2), k);
+        const y = snap(view.groundY - 40 - (Math.floor(now / 80) % 2) * 2, k);
         ctx.fillStyle = OUTLINE;
-        ctx.fillRect(x - 3, y - 1, 6, 14);
+        ctx.fillRect(x - 5, y - 2, 10, 24);
         ctx.fillStyle = '#e43b44';
-        ctx.fillRect(x - 2, y, 4, 8);
-        ctx.fillRect(x - 2, y + 10, 4, 2);
+        ctx.fillRect(x - 3, y, 6, 14);
+        ctx.fillRect(x - 3, y + 17, 6, 4);
         ctx.fillStyle = '#ff706d';
-        ctx.fillRect(x - 2, y, 1, 8);
+        ctx.fillRect(x - 3, y, 2, 14);
       }
       drawMonolithGlow(ctx, view, world.foe, now, k);
       if (state.poisoned === true) {
@@ -354,10 +379,11 @@ export function createRealStage() {
     reset() {
       state.decor = [];
       state.alarm = false;
+      state.trapArmed = false;
       state.monolith = false;
       state.poisoned = false;
       state.target = null;
-      Object.assign(state.boss, { power: 1, charge: 0, lash: 0, laser: null, enraged: false });
+      Object.assign(state.boss, { power: 1, charge: 0, lash: 0, laser: null, enraged: false, talking: false });
       for (const actor of [state.lamp, state.genie, state.arrow]) {
         actor.visible = false;
         actor.dx = 0;

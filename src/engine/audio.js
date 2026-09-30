@@ -14,32 +14,59 @@ export function createAudio(storage, env = globalThis) {
     source.start(0);
   }
 
-  function unlock() {
-    if (context !== null) {
-      if (context.state !== 'running') {
-        const resumed = context.resume();
-        if (resumed !== undefined && typeof resumed.catch === 'function') resumed.catch(() => {});
-      }
-      return;
-    }
+  const STUCK_MS = 1000;
+  const clock = typeof env.now === 'function' ? env.now : () => (env.performance !== undefined ? env.performance.now() : Date.now());
+  let resumeRequestedAt = null;
+
+  function createContext() {
     const AudioContextClass = env.AudioContext ?? env.webkitAudioContext;
-    if (typeof AudioContextClass !== 'function') return;
+    if (typeof AudioContextClass !== 'function') return false;
     try {
       context = new AudioContextClass();
     } catch {
       context = null;
-      return;
+      return false;
     }
     master = context.createGain();
-    master.gain.value = muted === true ? 0 : MASTER_VOLUME;
+    master.gain.value = MASTER_VOLUME;
     master.connect(context.destination);
     noiseBuffer = context.createBuffer(1, context.sampleRate, context.sampleRate);
     const channel = noiseBuffer.getChannelData(0);
     for (let index = 0; index < channel.length; index++) channel[index] = Math.random() * 2 - 1;
+    return true;
+  }
+
+  function resume() {
+    const resumed = context.resume();
+    if (resumed !== undefined && typeof resumed.catch === 'function') resumed.catch(() => {});
+  }
+
+  function unlock() {
+    const time = clock();
+    if (context !== null && context.state === 'running') {
+      resumeRequestedAt = null;
+      return;
+    }
+    if (context !== null && context.state !== 'closed' && (resumeRequestedAt === null || time - resumeRequestedAt < STUCK_MS)) {
+      if (resumeRequestedAt === null) resumeRequestedAt = time;
+      resume();
+      playSilentSample();
+      return;
+    }
+    if (context !== null) {
+      const stale = context;
+      context = null;
+      if (typeof stale.close === 'function' && stale.state !== 'closed') {
+        const closing = stale.close();
+        if (closing !== undefined && typeof closing.catch === 'function') closing.catch(() => {});
+      }
+    }
+    if (createContext() === false) return;
     playSilentSample();
+    resumeRequestedAt = null;
     if (context.state !== 'running') {
-      const resumed = context.resume();
-      if (resumed !== undefined && typeof resumed.catch === 'function') resumed.catch(() => {});
+      resumeRequestedAt = time;
+      resume();
     }
   }
 
@@ -177,6 +204,7 @@ export function createAudio(storage, env = globalThis) {
       noise({ ms: 260, vol: 0.12, from: 4000, to: 900, type: 'bandpass', q: 1.5 });
     },
     powerDown: () => tone({ type: 'sawtooth', from: 440, to: 40, ms: 1300, vol: 0.07 }),
+    voice: () => tone({ type: 'square', from: 140 + Math.random() * 90, ms: 38, vol: 0.05 }),
   };
 
   return {
@@ -187,7 +215,7 @@ export function createAudio(storage, env = globalThis) {
     toggleMute() {
       muted = muted === false;
       storage.set('muted', muted === true ? '1' : '0');
-      if (master !== null) master.gain.value = muted === true ? 0 : MASTER_VOLUME;
+      if (muted === false) unlock();
       return muted;
     },
   };

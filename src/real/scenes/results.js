@@ -67,7 +67,8 @@ export async function showResults(scene, { api, runId, body, alive, storage, onA
     (error) => ({ ok: false, error }),
   );
   const title = el('h2', won === true ? 'results-title' : 'results-title is-lost', t(won === true ? 'real.victory' : 'real.gameOver'));
-  const subtitle = el('p', 'results-subtitle', won === true ? heroName(state.hero) : t('real.killedBy', { name: scene.killerName() }));
+  const firstName = state.hero.firstName ?? heroName(state.hero);
+  const subtitle = el('p', 'results-subtitle', won === true ? t('real.victoryLine', { name: firstName }) : t('real.killedBy', { name: scene.killerName() }));
   const tally = el('ul', 'tally');
   const status = el('p', 'results-status', '');
   status.hidden = true;

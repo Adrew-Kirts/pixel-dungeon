@@ -100,7 +100,7 @@ export function createInitialsEntry({ initial = 'AAA', onChange = () => {}, onSu
     });
     holdable(up, index, 1);
     holdable(down, index, -1);
-    append(slot, letter, append(el('div', 'initials-arrows'), up, down));
+    append(slot, up, letter, down);
     row.append(slot);
     slots.push({ letter });
   }

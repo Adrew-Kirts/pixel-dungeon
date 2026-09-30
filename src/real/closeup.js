@@ -29,18 +29,51 @@ export function createCloseup() {
     return Math.max(0, now - active.startedAt);
   }
 
-  function drawCrosshair(ctx, x, y, color) {
-    ctx.fillStyle = '#181425';
-    ctx.fillRect(Math.round(x) - 6, Math.round(y) - 1, 4, 3);
-    ctx.fillRect(Math.round(x) + 3, Math.round(y) - 1, 4, 3);
-    ctx.fillRect(Math.round(x) - 1, Math.round(y) - 6, 3, 4);
-    ctx.fillRect(Math.round(x) - 1, Math.round(y) + 3, 3, 4);
+  function pixel(ctx, x, y, color) {
     ctx.fillStyle = color;
-    ctx.fillRect(Math.round(x) - 5, Math.round(y), 3, 1);
-    ctx.fillRect(Math.round(x) + 3, Math.round(y), 3, 1);
-    ctx.fillRect(Math.round(x), Math.round(y) - 5, 1, 3);
-    ctx.fillRect(Math.round(x), Math.round(y) + 3, 1, 3);
     ctx.fillRect(Math.round(x), Math.round(y), 1, 1);
+  }
+
+  function drawCrosshair(ctx, x, y, color, now, locked) {
+    const cx = Math.round(x);
+    const cy = Math.round(y);
+    const radius = 9;
+    const ringPoints = new Map();
+    for (let step = 0; step < 96; step++) {
+      const angle = (step / 96) * Math.PI * 2;
+      if (Math.abs(Math.sin(angle * 2)) < 0.38) continue;
+      const px = cx + Math.round(Math.cos(angle) * radius);
+      const py = cy + Math.round(Math.sin(angle) * radius);
+      ringPoints.set(`${px},${py}`, [px, py]);
+    }
+    const outline = new Map();
+    for (const [px, py] of ringPoints.values()) {
+      for (const [ox, oy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) outline.set(`${px + ox},${py + oy}`, [px + ox, py + oy]);
+    }
+    const ticks = [];
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      for (let distance = radius - 2; distance <= radius + 5; distance++) ticks.push([cx + dx * distance, cy + dy * distance, dx, dy]);
+    }
+    for (const [px, py, dx, dy] of ticks) {
+      outline.set(`${px + dy},${py + dx}`, [px + dy, py + dx]);
+      outline.set(`${px - dy},${py - dx}`, [px - dy, py - dx]);
+    }
+    for (const [px, py] of outline.values()) pixel(ctx, px, py, '#181425');
+    for (const [px, py] of ringPoints.values()) pixel(ctx, px, py, color);
+    for (const [px, py] of ticks) pixel(ctx, px, py, '#fee761');
+    const spin = locked === true ? 0 : now / 1100;
+    for (let corner = 0; corner < 4; corner++) {
+      const angle = spin + Math.PI / 4 + corner * (Math.PI / 2);
+      const bx = cx + Math.cos(angle) * (radius + 5);
+      const by = cy + Math.sin(angle) * (radius + 5);
+      for (const side of [0.75, -0.75]) {
+        const ax = Math.cos(angle + Math.PI * side);
+        const ay = Math.sin(angle + Math.PI * side);
+        for (let length = 0; length <= 2; length++) pixel(ctx, bx + ax * length, by + ay * length, '#feae34');
+      }
+    }
+    for (const [ox, oy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) pixel(ctx, cx + ox, cy + oy, '#181425');
+    pixel(ctx, cx, cy, locked === true || Math.floor(now / 220) % 2 === 0 ? '#e43b44' : '#ff706d');
   }
 
   return {
@@ -104,8 +137,8 @@ export function createCloseup() {
       ctx.globalAlpha = active.alpha;
       const ms = elapsed(now);
       const point = toScreen(frame, aim, crosshairAt(aim, ms));
-      const color = active.ring === 'bullseye' ? '#fee761' : active.ring === 'close' ? '#c0cbdc' : active.ring === null ? '#ffffff' : '#e43b44';
-      drawCrosshair(ctx, point.x, point.y, color);
+      const color = active.ring === 'bullseye' ? '#fee761' : active.ring === 'close' ? '#c0cbdc' : active.ring === null ? '#e4edf9' : '#e43b44';
+      drawCrosshair(ctx, point.x, point.y, color, now, active.frozenMs !== null);
       const barWidth = Math.round(view.W * (view.portrait === true ? 0.6 : 0.46));
       const barLeft = Math.round((view.W - barWidth) / 2);
       const barTop = view.portrait === true || frame.short === true ? frame.top + frame.height + 5 : view.H - 6;

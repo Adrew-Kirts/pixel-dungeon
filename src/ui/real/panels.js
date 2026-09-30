@@ -1,5 +1,5 @@
 import { t, heroName, itemName } from '../../i18n.js';
-import { el, append } from '../dom.js';
+import { el, append, waitForChoice } from '../dom.js';
 import { applyIcon } from '../icons.js';
 
 export function waitForKeyedChoice(root, { guardMs = 400 } = {}) {
@@ -122,6 +122,22 @@ export function geniePanel(question) {
       result.replaceChildren(...lines.map((line) => el('span', 'genie-line', line)));
     },
   };
+}
+
+export function tutorialPanel({ eyebrow, title, text, icon = null }, { input, scheduler }, autoMs = 6000) {
+  const card = el('div', 'panel-card tutorial');
+  const iconElement = icon === null ? null : el('span', 'px-icon tutorial-icon');
+  if (iconElement !== null) applyIcon(iconElement, icon, 4);
+  const go = el('button', 'btn btn-primary', t('real.ready'));
+  go.type = 'button';
+  go.dataset.choice = 'go';
+  const fill = el('span', 'auto-bar-fill');
+  append(card, el('p', 'eyebrow', eyebrow), iconElement, el('h2', 'panel-title tutorial-title', title), el('p', 'tutorial-text', text), go, append(el('div', 'auto-bar'), fill));
+  const countdown = { value: 1 };
+  const auto = scheduler.tween(countdown, { value: 0 }, autoMs, 'linear', (state) => {
+    fill.style.transform = `scaleX(${state.value})`;
+  });
+  return { el: card, done: waitForChoice(card, input, { tapValue: 'go', guardMs: 700, auto }) };
 }
 
 export function doubleShotScene(hero) {

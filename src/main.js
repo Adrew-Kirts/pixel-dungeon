@@ -19,6 +19,8 @@ import { createEasySeeds } from './net/seeds.js';
 import { createRealFlow } from './real/flow.js';
 import { createRealStage } from './real/stage.js';
 import { createCloseup } from './real/closeup.js';
+import { pickLanguage } from './ui/language.js';
+import { setupStats } from './ui/stats.js';
 
 window.__dungeonReady = true;
 const root = document.documentElement;
@@ -51,6 +53,7 @@ const game = {
   storage,
   reducedMotion,
   seeds: null,
+  api,
   mode: 'easy',
   lastEasy: null,
   real: { stage: createRealStage(), closeup: createCloseup() },
@@ -95,6 +98,8 @@ if (Number.isFinite(seedParam) === true) {
     .catch(() => treasure.setRealAvailable(false));
 }
 game.seeds.warm();
+setupStats({ api, storage });
+if (Number.isFinite(seedParam) === false) api.event('visit');
 const challengeId = params.get('challenge');
 if (typeof challengeId === 'string' && /^[A-Za-z0-9_-]{6,32}$/.test(challengeId) === true) {
   api
@@ -150,8 +155,7 @@ muteButton.addEventListener('click', (event) => {
 });
 renderMute();
 
-document.getElementById('lang').addEventListener('click', (event) => {
-  if (event.detail > 0) event.currentTarget.blur();
+document.getElementById('lang-switch').addEventListener('click', () => {
   setLanguage(getLanguage() === 'fr' ? 'en' : 'fr');
 });
 onLanguageChange(() => {
@@ -184,7 +188,7 @@ function render() {
   ctx.save();
   ctx.translate(snap(camera.state.offsetX, k), snap(camera.state.offsetY, k));
   const realStage = game.real.stage;
-  const lights = game.background.draw(ctx, view, game.world.camX, now, k, realStage.hiddenRanges());
+  const lights = game.background.draw(ctx, view, game.world.camX, now, k, realStage.hiddenRanges(view, game.world.camX));
   realStage.drawBack(ctx, view, game.world, sprites, now, k);
   drawWorld(ctx, view, game.world, sprites, now, k);
   realStage.drawFront(ctx, view, sprites, now, k);
@@ -226,6 +230,11 @@ async function start() {
     treasure.show(null, storage.getJson('record'));
   } else {
     root.classList.add('mode-game');
+    if (storage.get('lang') === null) {
+      setLanguage(await pickLanguage(getLanguage()));
+      applyStaticTranslations();
+      api.event(`lang.${getLanguage()}`);
+    }
     flow.start({ withBoot: true });
   }
 }

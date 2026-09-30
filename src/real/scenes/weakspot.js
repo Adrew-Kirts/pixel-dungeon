@@ -2,6 +2,7 @@ import { t } from '../../i18n.js';
 import { ringAt } from '../engine.js';
 import { restartable, tapOrTimeout } from '../prompt.js';
 import { addScore } from './common.js';
+import { tutorialPanel } from '../../ui/real/panels.js';
 
 const RING_FLOATS = { bullseye: 'label-crit', close: 'label', head: 'label', miss: 'label-rage' };
 
@@ -16,6 +17,14 @@ export async function weakSpot(scene, event) {
   await scheduler.tween(view, { alpha: 1 }, 320, 'outQuad');
   await scheduler.wait(550);
   hud.hideBanner();
+  if (scene.aimExplained !== true) {
+    scene.aimExplained = true;
+    const panel = tutorialPanel({ eyebrow: t('foe.monolith.name'), title: t('real.aimTitle'), text: t('real.aimText') }, game, 7000);
+    hud.panel(panel.el);
+    await panel.done;
+    audio.sfx.select();
+    await hud.closePanel();
+  }
   hud.hint(t('real.aimHint'));
 }
 

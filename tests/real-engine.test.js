@@ -449,3 +449,31 @@ test('a killing strike before any weak spot leaves the boss at 1 hp and opens it
   const miss = events.find((event, index) => index > firstAim && event.type === 'aim');
   assert.equal(miss.ring, 'miss');
 });
+
+test('a monster waits right after the scope creep chest, and only the last fight can hold two', () => {
+  assert.deepEqual(ROOM_PLAN, ['fight', 'fight', 'genie', 'trap', 'midboss', 'chest', 'fight', 'genie', 'fight', 'genie', 'boss']);
+  const sizes = new Set();
+  for (let seed = 1; seed <= 30; seed++) {
+    const state = createRealRun({ seed, easyHero: null });
+    const fights = state.plan.filter((room) => room.kind === 'fight');
+    assert.equal(fights.length, 4);
+    for (const room of fights.slice(0, 3)) assert.equal(room.monsters.length, 1);
+    sizes.add(fights[3].monsters.length);
+  }
+  assert.deepEqual([...sizes].sort(), [1, 2]);
+});
+
+test('the weak spot lasts five seconds and the crosshair crosses the eye three times', () => {
+  const { need } = findAim();
+  assert.equal(need.timeoutMs, 5000);
+  const onEye = need.waypoints.filter((point) => point.x === need.eye.x && point.y === need.eye.y);
+  assert.equal(onEye.length, 3);
+  const bullseyeWindows = [];
+  let inside = false;
+  for (let ms = 0; ms <= need.timeoutMs; ms += 5) {
+    const hit = ringAt(need, ms) === 'bullseye';
+    if (hit === true && inside === false) bullseyeWindows.push(ms);
+    inside = hit;
+  }
+  assert.equal(bullseyeWindows.length >= 3, true);
+});

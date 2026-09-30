@@ -9,7 +9,7 @@ export const HARD_MONSTERS = [
   { id: 'monk', name: 'Dark Monk', tile: 111, line: 'Took a vow of violence.' },
 ];
 
-export const MONSTER_STATS = { hpFactor: [2.2, 2.6], atk: [2, 2] };
+export const MONSTER_STATS = { hpFactor: [1.9, 2.3], atk: [2, 3] };
 
 export const MIDBOSS = {
   id: 'scopeCreep',
@@ -27,7 +27,7 @@ export const FINAL_BOSS = {
   name: 'THE LEGACY MONOLITH',
   title: 'Too big for this screen',
   hpFactor: 10,
-  atk: [2, 3],
+  atk: [3, 4],
   enrageBonus: 1,
   perfectsForWeakSpot: 2,
 };
@@ -37,7 +37,7 @@ export const WEAK_SPOT = {
   rings: { bullseye: 0.13, close: 0.32 },
   amplitude: [0.85, 1.05],
   periodMs: [1100, 1800],
-  timeoutMs: 3000,
+  timeoutMs: 5000,
   multipliers: { bullseye: 6, close: 3, head: 1, miss: 0 },
 };
 
@@ -195,4 +195,4 @@ export const QUESTIONS = {
 
 export const RANDOM_QUESTION_IDS = ['nationality', 'drink', 'console', 'pet', 'os', 'skills', 'volunteer'];
 
-export const ROOM_PLAN = ['fight', 'fight', 'genie', 'trap', 'midboss', 'chest', 'genie', 'fight', 'genie', 'boss'];
+export const ROOM_PLAN = ['fight', 'fight', 'genie', 'trap', 'midboss', 'chest', 'fight', 'genie', 'fight', 'genie', 'boss'];

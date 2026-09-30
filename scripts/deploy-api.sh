@@ -22,6 +22,9 @@ if [ ! -f .env ]; then
   umask 077
   printf 'HMAC_SECRET=%s\n' "\$(openssl rand -hex 32)" > .env
 fi
+if ! grep -q '^STATS_KEY=' .env; then
+  printf 'STATS_KEY=%s\n' "\$(openssl rand -hex 16)" >> .env
+fi
 chmod 600 .env
 docker volume create strikwerda_api_data > /dev/null
 docker run --rm -v strikwerda_api_data:/data alpine:3 chown 1000:1000 /data

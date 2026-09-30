@@ -74,6 +74,21 @@ function rampTransform(ramp) {
   };
 }
 
+const WALL_COLORS = ['139,155,180', '82,96,124', '192,203,220'];
+
+function cutout(source) {
+  const canvas = makeCanvas(source.width, source.height);
+  const context = canvas.getContext('2d');
+  context.drawImage(source, 0, 0);
+  const data = context.getImageData(0, 0, canvas.width, canvas.height);
+  const pixels = data.data;
+  for (let index = 0; index < pixels.length; index += 4) {
+    if (WALL_COLORS.includes(`${pixels[index]},${pixels[index + 1]},${pixels[index + 2]}`) === true) pixels[index + 3] = 0;
+  }
+  context.putImageData(data, 0, 0);
+  return canvas;
+}
+
 export async function loadSprites() {
   const [tiles, sheet] = await Promise.all([loadImage('assets/tiles.png'), loadImage('assets/sprites.png')]);
   const cache = new Map();
@@ -105,6 +120,7 @@ export async function loadSprites() {
     if (variant === 'base') canvas = base(key);
     else if (variant === 'flash') canvas = remap(get(key), () => [255, 255, 255]);
     else if (variant === 'gold') canvas = remap(get(key), rampTransform(GOLD_RAMP));
+    else if (variant === 'cutout') canvas = cutout(get(key));
     else canvas = remap(get(key), rampTransform(GRAY_RAMP));
     cache.set(cacheKey, canvas);
     return canvas;

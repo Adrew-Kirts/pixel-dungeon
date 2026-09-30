@@ -593,6 +593,122 @@ def cable(layer, points, band, radius=1.6):
     layer.set(int(tx) + 1, int(ty) - 3, 's')
 
 
+def language_flag(kind):
+    width, height = 24, 16
+    layer = Layer(width, height, P)
+    for y in range(height):
+        for x in range(width):
+            if kind == 'fr':
+                layer.set(x, y, 'b' if x < 8 else 'W' if x < 16 else 'R')
+                continue
+            px, py = x + 0.5, y + 0.5
+            key = 'b'
+            for diagonal in (abs(py - px * height / width), abs(py - (height - px * height / width))):
+                if diagonal < 1.7:
+                    key = 'W'
+            for diagonal in (abs(py - px * height / width), abs(py - (height - px * height / width))):
+                if diagonal < 0.55:
+                    key = 'R'
+            if 6 <= y <= 9 or 10 <= x <= 13:
+                key = 'W'
+            if 7 <= y <= 8 or 11 <= x <= 12:
+                key = 'R'
+            layer.set(x, y, key)
+    layer.outline()
+    return layer.image()
+
+
+def genie(frame):
+    width, height = 32, 32
+    layer = Layer(width, height, P)
+    cx, cy = 16.0, 9.5
+    for y in range(3, 17):
+        for x in range(9, 24):
+            dx, dy = (x + 0.5 - cx) / 6.6, (y + 0.5 - cy) / 6.4
+            if dx * dx + dy * dy <= 1:
+                shade = (x + 0.5 - cx) + (y + 0.5 - cy)
+                layer.set(x, y, 'c' if shade < -7 else 'b' if shade > 5.5 else 'B')
+    for x, y in ((9, 9), (9, 10), (8, 9)):
+        layer.set(x, y, 'B')
+    for x, y in ((23, 9), (23, 10), (24, 9)):
+        layer.set(x, y, 'b')
+    layer.set(23, 11, 'y')
+    layer.set(23, 12, 'Y')
+    for x, y in ((15, 0), (16, 0), (14, 1), (15, 1), (16, 1), (17, 1), (15, 2), (16, 2)):
+        layer.set(x, y, 'K')
+    for x in (14, 15, 16, 17):
+        layer.set(x, 3, 'y')
+    for x, y in ((11, 6), (12, 5), (13, 5), (14, 6), (17, 6), (18, 5), (19, 5), (20, 6)):
+        layer.set(x, y, 'K')
+    for x, y in ((12, 7), (13, 7), (12, 8), (13, 8), (18, 7), (19, 7), (18, 8), (19, 8)):
+        layer.set(x, y, 'W')
+    for x, y in ((12, 8), (18, 8)):
+        layer.set(x, y, 'K')
+    layer.set(12, 7, 'K')
+    layer.set(18, 7, 'K')
+    layer.set(13, 7, 'W')
+    layer.set(19, 7, 'W')
+    layer.set(16, 10, 'b')
+    layer.set(15, 10, 'b')
+    for x, y in ((11, 10), (21, 10)):
+        layer.set(x, y, 'p')
+    layer.set(12, 11, 'K')
+    layer.set(20, 11, 'K')
+    layer.set(13, 12, 'K')
+    for x in range(14, 19):
+        layer.set(x, 12, 'W')
+    layer.set(19, 12, 'K')
+    layer.set(14, 13, 'K')
+    for x in (15, 16, 17):
+        layer.set(x, 13, 'p')
+    layer.set(18, 13, 'K')
+    for x in (15, 16, 17):
+        layer.set(x, 14, 'K')
+    for x, y in ((15, 16), (16, 16), (17, 16), (16, 17)):
+        layer.set(x, y, 'K')
+    for x in range(14, 19):
+        layer.set(x, 16, 'b')
+    rows = {17: (10, 22), 18: (8, 24), 19: (7, 25), 20: (7, 25), 21: (7, 25), 22: (8, 24), 23: (10, 22), 24: (11, 21)}
+    for y, (x0, x1) in rows.items():
+        for x in range(x0, x1 + 1):
+            layer.set(x, y, 'b' if x >= x1 - 1 else 'B')
+    for y in range(17, 25):
+        x0, x1 = rows[y]
+        for x in range(x0, min(x0 + 3, 15)):
+            layer.set(x, y, 'R')
+        for x in range(max(x1 - 2, 18), x1 + 1):
+            layer.set(x, y, 'r')
+        layer.set(min(x0 + 3, 15), y, 'y')
+        layer.set(max(x1 - 3, 17), y, 'y')
+    for y in (19, 20):
+        for x in range(8, 25):
+            layer.set(x, y, 'c' if y == 19 and 9 < x < 20 else 'B')
+    for y in (21, 22):
+        for x in range(8, 25):
+            layer.set(x, y, 'b' if y == 22 else 'B')
+    for x in range(9, 24):
+        layer.set(x, 21, 'b')
+    for x, y in ((6, 20), (6, 21), (26, 20), (26, 21)):
+        layer.set(x, y, 'B')
+    for y in (19, 20):
+        layer.set(21, y, 'y')
+        layer.set(22, y, 'Y')
+    for y in (21, 22):
+        layer.set(10, y, 'Y')
+        layer.set(11, y, 'y')
+    for x in range(11, 22):
+        layer.set(x, 24, 'V')
+    tails = [
+        [(12, 25, 21), (13, 26, 20), (14, 27, 19), (15, 28, 19), (16, 29, 20), (17, 30, 21), (19, 31, 22)],
+        [(11, 25, 20), (12, 26, 19), (13, 27, 18), (13, 28, 17), (12, 29, 16), (11, 30, 15), (10, 31, 13)],
+    ]
+    for x0, y, x1 in tails[frame]:
+        for x in range(x0, x1):
+            layer.set(x, y, 'c' if x == x0 else 'b' if x == x1 - 1 else 'B')
+    layer.outline()
+    return layer.image()
+
+
 def build_real_icons(dragon_head):
     images = {name: icon(rows) for name, rows in ICONS.items()}
     images['flagNL'] = flag(['R', 'W', 'b'], vertical=False)
@@ -600,12 +716,14 @@ def build_real_icons(dragon_head):
     images['flagDE'] = flag(['X', 'R', 'y'], vertical=False)
     images['flagFR'] = flag(['b', 'W', 'R'], vertical=True)
     images['petDragon'] = dragon_head
-    for index, tail in enumerate(GENIE_TAILS):
-        images[f'genie{index}'] = icon(GENIE_TOP + tail, 24, 26)
+    images['genie0'] = genie(0)
+    images['genie1'] = genie(1)
     images['lamp'] = icon(LAMP, 18, 9)
     images['arrow'] = icon(ARROW, 12, 5)
     images['poster'] = poster()
     images['scopeCreep'] = scope_creep()
     images['monolithFace'] = monolith_face()
     images['monolithPanel'] = monolith_face().crop((18, 1, 46, 47))
+    images['langEN'] = language_flag('en')
+    images['langFR'] = language_flag('fr')
     return images

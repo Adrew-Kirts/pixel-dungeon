@@ -19,7 +19,7 @@ Vanilla JS · Canvas 2D · WebAudio · Node 24 · zero dependencies · EN / FR
 |  | 🗡️ The easy run | 💀 The Real Dungeon |
 |---|---|---|
 | **Length** | ~25 s | ~2 min |
-| **Rooms** | 1 fight, 1 chest, 1 dragon | 10 rooms: fights, a genie, a trap, a mid-boss, a final boss |
+| **Rooms** | 1 fight, 1 chest, 1 dragon | 11 rooms: fights, a genie, a trap, a mid-boss, a final boss |
 | **Goal** | Beat the dragon, get a rank (C → S) | Arcade score, top 5 on the wall |
 | **Controls** | One button: tap, click, Space or Enter | Same, plus 1–4 for answers |
 | **Needs a server?** | No | Yes, every score is replayed server-side |
@@ -55,10 +55,11 @@ Reached from the treasure page. Keep the hero from your easy run (weapon and pot
 | 4 | 🏹 **Trap room.** Three arrows fly out of the wall; tap when the red **!** flashes to jump over them |
 | 5 | 🟩 **SCOPE CREEP**, "It only gets bigger": a slime covered in sticky notes that grows and hits harder every second turn |
 | 6 | 🎲 A chest, easy-mode rules |
-| 7 | 🧞 The genie again |
-| 8 | One or two monsters |
-| 9 | 🧞 The genie, always the same question: *Would you hire Ezra?* (Answering no has consequences) |
-| 10 | ❓ **The final boss.** No spoilers. Go and meet it |
+| 7 | Another monster |
+| 8 | 🧞 The genie again |
+| 9 | One or two monsters |
+| 10 | 🧞 The genie, always the same question: *Would you hire Ezra?* (Answering no has consequences) |
+| 11 | ❓ **The final boss.** No spoilers. Go and meet it |
 
 **Potions.** You carry up to two. When your HP drops low the game asks: drink, save it, or — with two — **DOUBLE SHOT**: both at once and double damage on the next hit.
 
@@ -134,5 +135,5 @@ The remaster keeps the idea (random hero, dice, loot, dragon) and turns it into 
 
 - Code: [MIT](LICENSE).
 - Sprites: Tiny Dungeon by [Kenney](https://www.kenney.nl) (CC0), plus custom sprites drawn in the same style by `scripts/art`.
-- Font: [Pixelify Sans](https://github.com/eifetx/Pixelify-Sans) (SIL Open Font License 1.1).
+- Fonts: [Pixelify Sans](https://github.com/eifetx/Pixelify-Sans), plus [Tiny5](https://github.com/Gissio/font_tiny5) for digits (both SIL Open Font License 1.1).
 - Details in [CREDITS.md](CREDITS.md).

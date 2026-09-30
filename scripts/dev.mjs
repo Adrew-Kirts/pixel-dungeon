@@ -21,7 +21,8 @@ const TYPES = {
 };
 
 const store = createStore(process.env.DB_PATH ?? ':memory:');
-const apiServer = createApiServer({ store, secret: randomBytes(32).toString('hex'), config: { origin: `http://localhost:${PORT}` } });
+const STATS_KEY = process.env.STATS_KEY ?? 'dev-stats-key-0123456789';
+const apiServer = createApiServer({ store, secret: randomBytes(32).toString('hex'), config: { origin: `http://localhost:${PORT}`, statsKey: STATS_KEY } });
 const apiHandler = apiServer.listeners('request')[0];
 
 async function serveStatic(request, response) {
@@ -61,4 +62,4 @@ http
     }
     serveStatic(request, response);
   })
-  .listen(PORT, () => console.log(`dev server on http://localhost:${PORT}${API_DOWN === true ? ' (API down)' : ''}`));
+  .listen(PORT, () => console.log(`dev server on http://localhost:${PORT}${API_DOWN === true ? ' (API down)' : ''} · stats key ${STATS_KEY}`));

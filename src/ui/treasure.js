@@ -10,6 +10,8 @@ export function createTreasure({ onPlay, onReal, input }) {
   play.addEventListener('click', () => onPlay());
   const realButton = document.getElementById('real-dungeon');
   realButton.addEventListener('click', () => onReal());
+  const scrollHint = document.getElementById('scroll-hint');
+  scrollHint.addEventListener('click', () => realButton.scrollIntoView({ behavior: 'smooth', block: 'center' }));
   const challengeBanner = document.getElementById('challenge');
   let challenge = null;
 
@@ -67,6 +69,7 @@ export function createTreasure({ onPlay, onReal, input }) {
     },
     setRealAvailable(available) {
       realButton.hidden = available === false;
+      scrollHint.hidden = available === false;
     },
     hide() {
       input.setEnabled(true);

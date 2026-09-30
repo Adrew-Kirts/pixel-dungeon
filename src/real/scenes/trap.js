@@ -3,6 +3,7 @@ import { actorX } from '../../stage/world.js';
 import { hitHero } from '../../scenes/battle.js';
 import { top } from '../../scenes/common.js';
 import { restartable } from '../prompt.js';
+import { tutorialPanel } from '../../ui/real/panels.js';
 import { addScore } from './common.js';
 
 const FLIGHT_MS = 300;
@@ -44,12 +45,16 @@ export async function flyArrow(scene, { hit }) {
 }
 
 export async function trapStart(scene) {
-  const { hud, audio, scheduler, camera } = scene.game;
+  const { game } = scene;
+  const { hud, audio, camera } = game;
   audio.sfx.alarm();
   camera.shake(1, 300);
-  hud.banner(t('real.trap'), t('real.dodgeHint'));
-  await scheduler.wait(1200);
-  hud.hideBanner();
+  scene.stage.state.trapArmed = true;
+  const panel = tutorialPanel({ eyebrow: t('real.trap'), title: t('real.trapTitle'), text: t('real.trapText'), icon: 'icon:arrow' }, game);
+  hud.panel(panel.el);
+  await panel.done;
+  audio.sfx.select();
+  await hud.closePanel();
   hud.hint(t('real.dodgeHint'));
 }
 
@@ -80,8 +85,7 @@ export function promptDodge(scene, need) {
           telegraphAt = performance.now();
           stage.state.alarm = true;
           game.audio.sfx.alarm();
-          const head = top(game, game.world.hero);
-          game.hud.floatText(head.x + 14, head.y - 10, t('real.dodge'), 'label-rage');
+          game.hud.flashWord(t('real.tapNow'), 650);
           timers.push(setTimeout(() => launch(scene), LAUNCH_DELAY_MS));
           timers.push(
             setTimeout(() => {

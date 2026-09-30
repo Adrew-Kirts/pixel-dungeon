@@ -9,13 +9,14 @@ let server;
 let base;
 let clock = { time: 1_000_000 };
 const store = createStore(':memory:');
+const STATS_KEY = 'stats-key-for-the-tests-0123456789';
 
 before(async () => {
   server = createServer({
     store,
     secret: 'server-test-secret-that-is-long-enough',
     now: () => clock.time,
-    config: { rateLimits: { start: { limit: 40, windowMs: 3_600_000 }, finish: { limit: 40, windowMs: 3_600_000 } } },
+    config: { statsKey: STATS_KEY, rateLimits: { start: { limit: 60, windowMs: 3_600_000 }, finish: { limit: 60, windowMs: 3_600_000 } } },
   });
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
   base = `http://127.0.0.1:${server.address().port}`;
@@ -228,4 +229,49 @@ test('malformed easy blocks and tokens are rejected with 4xx, never 500', async 
     const finish = await post(`/api/runs/${start.body.runId}/finish`, { token, inputs: [{ type: 'strike', ms: 100 }] });
     assert.ok(finish.status >= 400 && finish.status < 500, `${JSON.stringify(token)} → ${finish.status}`);
   }
+});
+
+async function stats(key = STATS_KEY) {
+  const response = await fetch(`${base}/api/stats`, { headers: key === null ? {} : { authorization: `Bearer ${key}` } });
+  const text = await response.text();
+  return { status: response.status, body: text.startsWith('{') ? JSON.parse(text) : text };
+}
+
+test('stats stay hidden without the right key', async () => {
+  assert.equal((await stats(null)).status, 401);
+  assert.equal((await stats('wrong-key-wrong-key-wrong-key')).status, 401);
+  const allowed = await stats();
+  assert.equal(allowed.status, 200);
+  assert.equal(typeof allowed.body.counters, 'object');
+});
+
+test('game events are counted and unknown events are refused', async () => {
+  const before = (await stats()).body.counters['easy.start'] ?? 0;
+  assert.equal((await post('/api/events', { type: 'easy.start' })).status, 200);
+  assert.equal((await post('/api/events', { type: 'easy.start' })).status, 200);
+  assert.equal((await post('/api/events', { type: 'lang.fr' })).status, 200);
+  assert.equal((await post('/api/events', { type: 'hack.the.planet' })).status, 422);
+  assert.equal((await post('/api/events', { type: 'constructor' })).status, 422);
+  const after = (await stats()).body.counters;
+  assert.equal(after['easy.start'], before + 2);
+  assert.equal(after['lang.fr'] >= 1, true);
+});
+
+test('a finished real run feeds the fun stats', async () => {
+  const before = (await stats()).body;
+  const { finish, played } = await playAndFinish({ policy: jitteredPolicy(41) });
+  assert.equal(finish.status, 200);
+  const after = (await stats()).body;
+  const count = (body, key) => body.counters[key] ?? 0;
+  assert.equal(count(after, 'real.finished'), count(before, 'real.finished') + 1);
+  assert.equal(count(after, 'real.score'), count(before, 'real.score') + finish.body.score);
+  assert.equal(count(after, 'real.perfects'), count(before, 'real.perfects') + played.state.counts.perfects);
+  assert.equal(count(after, 'real.hire.yes') + count(after, 'real.hire.no'), count(before, 'real.hire.yes') + count(before, 'real.hire.no') + 1);
+  assert.equal(typeof after.best, 'object');
+});
+
+test('guessing the stats key is rate limited', async () => {
+  let last = 0;
+  for (let attempt = 0; attempt < 15; attempt++) last = (await stats(`guess-${attempt}-guess-guess-guess-guess`)).status;
+  assert.equal(last, 429);
 });

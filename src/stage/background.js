@@ -10,7 +10,7 @@ function hash(value) {
   return (x ^ (x >>> 16)) >>> 0;
 }
 
-const DECOR_SEQUENCE = ['torch', 'bannerE', 'painting', 'torch', 'graffiti', 'window', 'torch', 'pictoSign', 'wanted', 'banner'];
+const DECOR_SEQUENCE = ['torch', 'bannerE', 'painting', 'torch', 'graffiti', 'banner', 'torch', 'pictoSign', 'wanted', 'banner'];
 
 function decorFor(index) {
   const length = DECOR_SEQUENCE.length;
@@ -32,7 +32,9 @@ export function createBackground(sprites) {
     const lastColumn = Math.ceil((camX + W) / 16) + 1;
     for (let column = firstColumn; column <= lastColumn; column++) {
       const x = column * 16 - camX;
-      for (let y = groundY - 16; y > -16; y -= 16) drawTile(ctx, tiles, TILE.bricks, x, y, k);
+      const windowRow = groundY - 48;
+      const hasWindow = hash(column * 977) % 9 === 0;
+      for (let y = groundY - 16; y > -16; y -= 16) drawTile(ctx, tiles, hasWindow === true && y === windowRow ? TILE.bricksWindow : TILE.bricks, x, y, k);
       for (let y = groundY; y < H + 16; y += 16) {
         const roll = hash(column * 131 + y * 7) % 9;
         let index = roll === 0 ? TILE.sandSpecks : roll === 1 ? TILE.sandDots : TILE.sand;
@@ -66,9 +68,7 @@ export function createBackground(sprites) {
       const kind = decorFor(index);
       const top = groundY - 34;
       if (kind === 'banner') {
-        drawTile(ctx, tiles, TILE.banner, x - 8, top - 4, k);
-      } else if (kind === 'window') {
-        drawTile(ctx, tiles, TILE.bricksWindow, x - 8, top - 2, k);
+        ctx.drawImage(sprites.get(`tile:${TILE.banner}`, 'cutout'), snap(x - 8, k), snap(top - 4, k));
       } else if (kind !== 'torch') {
         const decal = sprites.icon(kind);
         const y = kind === 'graffiti' ? groundY - 37 : kind === 'wanted' ? groundY - 46 : top - 3;

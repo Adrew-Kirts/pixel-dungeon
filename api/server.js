@@ -4,6 +4,8 @@ import { validateRealRun, ValidationError, DEFAULT_BOT_THRESHOLDS } from './vali
 import { createRateLimiter } from './ratelimit.js';
 import { isAllowedInitials } from './blocklist.js';
 import { renderSharePage } from './share.js';
+import { isEventType, funFacts } from './stats.js';
+import { createHash, timingSafeEqual } from 'node:crypto';
 
 class HttpError extends Error {
   constructor(status, code) {
@@ -14,7 +16,8 @@ class HttpError extends Error {
 }
 
 const DEFAULT_CONFIG = {
-  rateLimits: { start: { limit: 60, windowMs: 3_600_000 }, finish: { limit: 30, windowMs: 3_600_000 } },
+  rateLimits: { start: { limit: 60, windowMs: 3_600_000 }, finish: { limit: 30, windowMs: 3_600_000 }, events: { limit: 300, windowMs: 3_600_000 }, statsFailures: { limit: 10, windowMs: 3_600_000 } },
+  statsKey: null,
   runTtlMs: 30 * 60 * 1000,
   easyTtlMs: 60 * 60 * 1000,
   initialsWindowMs: 10 * 60 * 1000,
@@ -30,6 +33,8 @@ const ROUTES = [
   { method: 'POST', pattern: new RegExp(`^/api/runs/${ID_PATTERN}/finish$`), handler: 'finishRun' },
   { method: 'POST', pattern: new RegExp(`^/api/scores/${ID_PATTERN}/initials$`), handler: 'saveInitials' },
   { method: 'GET', pattern: /^\/api\/leaderboard$/, handler: 'leaderboard' },
+  { method: 'POST', pattern: /^\/api\/events$/, handler: 'event' },
+  { method: 'GET', pattern: /^\/api\/stats$/, handler: 'stats' },
   { method: 'GET', pattern: new RegExp(`^/api/results/${ID_PATTERN}$`), handler: 'result' },
   { method: 'GET', pattern: new RegExp(`^/r/${ID_PATTERN}$`), handler: 'sharePage' },
 ];
@@ -84,7 +89,17 @@ export function createServer({ store, secret, now = Date.now, config = {} }) {
   const limiters = {
     start: createRateLimiter({ ...settings.rateLimits.start, now }),
     finish: createRateLimiter({ ...settings.rateLimits.finish, now }),
+    events: createRateLimiter({ ...settings.rateLimits.events, now }),
+    statsFailures: createRateLimiter({ ...settings.rateLimits.statsFailures, now }),
   };
+  const statsDigest = typeof settings.statsKey === 'string' && settings.statsKey.length >= 16 ? createHash('sha256').update(settings.statsKey).digest() : null;
+
+  function hasStatsKey(request) {
+    const header = request.headers.authorization;
+    if (typeof header !== 'string' || header.startsWith('Bearer ') === false) return false;
+    const given = createHash('sha256').update(header.slice(7)).digest();
+    return timingSafeEqual(given, statsDigest);
+  }
 
   function qualifies(score) {
     if (store.boardSize() < settings.boardSize) return true;
@@ -109,6 +124,7 @@ export function createServer({ store, secret, now = Date.now, config = {} }) {
       const runId = randomId(12);
       const seed = randomSeed();
       store.createRun({ id: runId, mode: body.mode, seed, issuedAt: now() });
+      if (body.mode === 'real') store.incrementCounters({ 'real.started': 1 });
       return [200, { runId, seed, token: sign(secret, runId) }];
     },
     async finishRun(request, [runId]) {
@@ -134,8 +150,12 @@ export function createServer({ store, secret, now = Date.now, config = {} }) {
       }
       if (store.finishRun(runId, now()) === false) throw new HttpError(409, 'used');
       if (easyRun !== null && store.continueRun(easyRun.id, runId) === false) throw new HttpError(409, 'easy_used');
-      if (outcome.human === false) return [200, { human: false }];
+      if (outcome.human === false) {
+        store.incrementCounters({ 'real.bots': 1 });
+        return [200, { human: false }];
+      }
       const { state, score } = outcome;
+      store.incrementCounters(funFacts(outcome.events, state, score));
       const shareId = randomId(6);
       const qualified = qualifies(score.total);
       store.insertResult({
@@ -166,6 +186,23 @@ export function createServer({ store, secret, now = Date.now, config = {} }) {
     },
     async leaderboard() {
       return [200, { entries: store.leaderboard(settings.boardSize) }];
+    },
+    async event(request) {
+      const body = await readJson(request, 1024);
+      if (isEventType(body.type) === false) throw new HttpError(422, 'event');
+      if (limiters.events.allow(clientAddress(request)) === false) throw new HttpError(429, 'rate');
+      store.incrementCounters({ [body.type]: 1 });
+      return [200, { ok: true }];
+    },
+    async stats(request) {
+      if (statsDigest === null) throw new HttpError(404, 'route');
+      const address = clientAddress(request);
+      if (limiters.statsFailures.blocked(address) === true) throw new HttpError(429, 'rate');
+      if (hasStatsKey(request) === false) {
+        limiters.statsFailures.allow(address);
+        throw new HttpError(401, 'key');
+      }
+      return [200, { counters: store.counters(), best: store.bestResult(), wall: store.boardSize() }];
     },
     async result(request, [shareId]) {
       const result = store.getResult(shareId);
