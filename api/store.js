@@ -48,6 +48,7 @@ export function createStore(path) {
     increment: db.prepare('INSERT INTO counters (name, value) VALUES (?, ?) ON CONFLICT (name) DO UPDATE SET value = value + excluded.value'),
     counters: db.prepare('SELECT name, value FROM counters'),
     best: db.prepare('SELECT score, initials, outcome FROM results ORDER BY score DESC, created_at ASC LIMIT 1'),
+    above: db.prepare('SELECT COUNT(*) AS count FROM results WHERE score > ?'),
     listResults: db.prepare('SELECT share_id, initials, score, outcome, hero_name, created_at FROM results WHERE initials IS NOT NULL ORDER BY score DESC LIMIT ?'),
   };
   if (db.prepare("SELECT value FROM counters WHERE name = 'meta.backfilled'").get() === undefined) {
@@ -130,6 +131,9 @@ export function createStore(path) {
     },
     counters() {
       return Object.fromEntries(statements.counters.all().filter((row) => row.name.startsWith('meta.') === false).map((row) => [row.name, Number(row.value)]));
+    },
+    rankOf(score) {
+      return Number(statements.above.get(score).count) + 1;
     },
     bestResult() {
       const row = statements.best.get();

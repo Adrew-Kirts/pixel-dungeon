@@ -32,8 +32,9 @@ export function createBackground(sprites) {
     const lastColumn = Math.ceil((camX + W) / 16) + 1;
     for (let column = firstColumn; column <= lastColumn; column++) {
       const x = column * 16 - camX;
-      const windowRow = groundY - 48;
-      const hasWindow = hash(column * 977) % 9 === 0;
+      const windowRow = groundY - 64;
+      const columnCenter = column * 16 + 8;
+      const hasWindow = hash(column * 977) % 9 === 0 && hiddenRanges.some(([from, to]) => columnCenter >= from - 12 && columnCenter <= to + 12) === false;
       for (let y = groundY - 16; y > -16; y -= 16) drawTile(ctx, tiles, hasWindow === true && y === windowRow ? TILE.bricksWindow : TILE.bricks, x, y, k);
       for (let y = groundY; y < H + 16; y += 16) {
         const roll = hash(column * 131 + y * 7) % 9;

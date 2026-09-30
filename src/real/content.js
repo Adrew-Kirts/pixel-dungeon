@@ -146,7 +146,7 @@ export const QUESTIONS = {
   console: {
     id: 'console',
     text: 'Which console does Ezra play the most?',
-    answer: 'switch',
+    answer: 'gameboy',
     choices: [
       { id: 'switch', label: 'Switch', icon: 'consoleSwitch' },
       { id: 'playstation', label: 'PlayStation', icon: 'consolePlay' },

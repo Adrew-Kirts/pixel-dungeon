@@ -1,8 +1,9 @@
 import { el, append } from './dom.js';
 import { formatRunTime } from './panels.js';
 import { t, formatNumber, onLanguageChange } from '../i18n.js';
+import { renderBoard } from './real/board.js';
 
-export function createTreasure({ onPlay, onReal, input }) {
+export function createTreasure({ onPlay, onReal, input, api }) {
   const root = document.documentElement;
   const main = document.getElementById('treasure');
   const badge = main.querySelector('[data-role="run-badge"]');
@@ -20,6 +21,27 @@ export function createTreasure({ onPlay, onReal, input }) {
     if (challenge !== null) challengeBanner.textContent = t('challenge.banner', { who: challenge.initials ?? t('challenge.someone'), score: formatNumber(challenge.score) });
   }
   onLanguageChange(renderChallenge);
+  const wall = document.getElementById('wall');
+  const wallBoard = wall.querySelector('[data-role="board"]');
+  let wallEntries = null;
+
+  function renderWall() {
+    wall.hidden = wallEntries === null;
+    if (wallEntries !== null) wallBoard.replaceChildren(renderBoard(wallEntries));
+  }
+  onLanguageChange(renderWall);
+
+  function loadWall() {
+    return api
+      .leaderboard()
+      .then((response) => {
+        wallEntries = Array.isArray(response.entries) === true ? response.entries : null;
+      })
+      .catch(() => {
+        wallEntries = null;
+      })
+      .then(renderWall);
+  }
   const lightbox = document.getElementById('lightbox');
   for (const trigger of main.querySelectorAll('[data-lightbox]')) {
     trigger.addEventListener('click', (event) => {
@@ -55,9 +77,13 @@ export function createTreasure({ onPlay, onReal, input }) {
       root.classList.add('mode-treasure');
       renderBadge(summary, record);
       play.textContent = t(summary === null ? 'treasure.play' : 'treasure.playAgain');
-      if (location.hash !== '#treasure') history.replaceState(null, '', '#treasure');
+      const wantsWall = location.hash === '#wall';
+      if (location.hash !== '#treasure' && wantsWall === false) history.replaceState(null, '', '#treasure');
       window.scrollTo(0, 0);
       main.focus({ preventScroll: true });
+      loadWall().then(() => {
+        if (wantsWall === true && wall.hidden === false && root.classList.contains('mode-treasure') === true) wall.scrollIntoView({ block: 'start' });
+      });
     },
     setChallenge(value) {
       challenge = value;
@@ -75,7 +101,7 @@ export function createTreasure({ onPlay, onReal, input }) {
       input.setEnabled(true);
       root.classList.remove('mode-treasure');
       root.classList.add('mode-game');
-      if (location.hash === '#treasure') history.replaceState(null, '', location.pathname + location.search);
+      if (location.hash === '#treasure' || location.hash === '#wall') history.replaceState(null, '', location.pathname + location.search);
     },
     visible() {
       return root.classList.contains('mode-treasure');

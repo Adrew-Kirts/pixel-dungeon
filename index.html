@@ -103,6 +103,7 @@
             <button class="lang-option" type="button" data-lang="fr" data-flag="langFR"><span class="px-icon"></span><span class="lang-name">Français</span></button>
           </div>
           <div class="auto-bar"><span class="auto-bar-fill"></span></div>
+          <p class="lang-hint">Tap a flag to start · Touche un drapeau pour commencer</p>
         </div>
       </div>
       <div id="boot" class="boot" hidden><pre aria-hidden="true"></pre><p class="boot-skip" data-i18n="boot.skip">tap to skip</p></div>
@@ -127,7 +128,7 @@
           <h1 class="treasure-title">Ezra</h1>
           <p class="treasure-tagline" data-i18n="treasure.tagline">Developer based in Annecy</p>
           <p class="run-badge" data-role="run-badge" hidden></p>
-          <button id="scroll-hint" class="scroll-hint" type="button" hidden><span class="scroll-arrow" aria-hidden="true">▼</span><span data-i18n="treasure.scrollHint">Scroll down to enter the real dungeon</span><span class="scroll-arrow" aria-hidden="true">▼</span></button>
+          <button id="scroll-hint" class="scroll-hint" type="button" hidden><span class="scroll-arrow" aria-hidden="true">▼</span><span data-i18n="treasure.scrollHint">The real game is waiting below</span><span class="scroll-arrow" aria-hidden="true">▼</span></button>
         </header>
 
         <section class="treasure-section" aria-labelledby="featured-title">
@@ -181,14 +182,19 @@
           </div>
         </section>
 
+        <section id="wall" class="treasure-section wall-section" aria-labelledby="wall-title" hidden>
+          <h2 id="wall-title" class="section-title" data-i18n="real.leaderboard">The wall of fame</h2>
+          <div class="wall-body" data-role="board"></div>
+        </section>
+
         <p id="challenge" class="challenge" hidden></p>
         <div class="treasure-actions">
           <button id="play-again" class="btn btn-primary btn-large" type="button">Play again</button>
-          <button id="real-dungeon" class="btn btn-real" type="button" hidden><span data-i18n="treasure.real">or… ⚔ ENTER THE REAL DUNGEON</span><small data-i18n="treasure.realSub">only 5 names fit on the wall</small></button>
+          <button id="real-dungeon" class="btn btn-real" type="button" hidden><span data-i18n="treasure.real">or… ⚔ ENTER THE REAL DUNGEON</span><small data-i18n="treasure.realSub">only 5 names fit on the wall of fame</small></button>
         </div>
 
         <footer class="treasure-footer">
-          <p data-i18n="treasure.credits">Sprites: Tiny Dungeon by Kenney (CC0) · Font: Pixelify Sans (OFL) · © 2026 Ezra</p>
+          <p data-i18n="treasure.credits">Sprites: Tiny Dungeon by Kenney (CC0) · Fonts: Pixelify Sans &amp; Tiny5 (OFL) · © 2026 Ezra</p>
           <p><a href="https://github.com/Adrew-Kirts/pixel-dungeon" target="_blank" rel="noopener" data-i18n="treasure.source">Source code of this site ↗</a> · <button id="lang-switch" class="text-button" type="button" data-i18n="lang.switch">Version française</button></p>
         </footer>
       </div>

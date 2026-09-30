@@ -275,3 +275,27 @@ test('guessing the stats key is rate limited', async () => {
   for (let attempt = 0; attempt < 15; attempt++) last = (await stats(`guess-${attempt}-guess-guess-guess-guess`)).status;
   assert.equal(last, 429);
 });
+
+test('a run outside the top 5 learns its rank among all finished runs', async () => {
+  const rankedStore = createStore(':memory:');
+  const rankedServer = createServer({ store: rankedStore, secret: 'server-test-secret-that-is-long-enough', now: () => clock.time });
+  await new Promise((resolve) => rankedServer.listen(0, '127.0.0.1', resolve));
+  const rankedBase = `http://127.0.0.1:${rankedServer.address().port}`;
+  const send = async (path, body) => {
+    const response = await fetch(`${rankedBase}${path}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+    return { status: response.status, body: await response.json() };
+  };
+  for (let index = 0; index < 9; index++) {
+    const big = index < 6;
+    rankedStore.insertResult({ shareId: `seed0${index}`, runId: `seeded-${index}`, score: big === true ? 900000 + index : 1 + index, breakdown: '[]', outcome: 'victory', heroClass: 'warrior', heroName: 'X', foeName: 'THE LEGACY MONOLITH', qualifies: true, createdAt: index });
+    if (big === true) rankedStore.setInitials(`seed0${index}`, 'AAA');
+  }
+  const start = await send('/api/runs', { mode: 'real' });
+  const played = playReal(start.body.seed, jitteredPolicy(77));
+  clock.time += played.state.gameMs;
+  const finish = await send(`/api/runs/${start.body.runId}/finish`, { token: start.body.token, inputs: played.inputs });
+  await new Promise((resolve) => rankedServer.close(resolve));
+  assert.equal(finish.status, 200);
+  assert.equal(finish.body.qualifies, false);
+  assert.equal(finish.body.rank, 7);
+});

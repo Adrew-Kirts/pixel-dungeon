@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { STRINGS, EPITHETS_FR, FEMININE_NAMES } from '../src/strings.js';
 import { EPITHETS, FIRST_NAMES, DRAGON_TITLES, EPITAPHS } from '../src/content.js';
 import { HARD_MONSTERS, QUESTIONS } from '../src/real/content.js';
-import { detectLanguage, initLanguage, setLanguage, t, heroName } from '../src/i18n.js';
+import { detectLanguage, initLanguage, setLanguage, t, heroName, rankLabel } from '../src/i18n.js';
 
 const memory = (value = null) => ({ store: new Map(value === null ? [] : [['lang', value]]), get(key) { return this.store.get(key) ?? null; }, set(key, v) { this.store.set(key, v); return true; } });
 
@@ -51,4 +51,14 @@ test('french hero names follow the hero gender', () => {
   assert.equal(heroName({ name: 'Gerald the Overcaffeinated', firstName: 'Gerald', epithetIndex: index }), 'Gerald le Surcaféiné');
   setLanguage('en');
   assert.equal(heroName({ name: 'Gerald the Overcaffeinated', firstName: 'Gerald', epithetIndex: index }), 'Gerald the Overcaffeinated');
+});
+
+test('rank reads #12 in English and 12ème or 1er in French', () => {
+  setLanguage('en');
+  assert.equal(rankLabel(12), '#12');
+  setLanguage('fr');
+  assert.equal(rankLabel(12), '12ème');
+  assert.equal(rankLabel(1), '1er');
+  assert.equal(rankLabel(1234), '1 234ème');
+  setLanguage('en');
 });

@@ -20,7 +20,7 @@ Vanilla JS · Canvas 2D · WebAudio · Node 24 · zero dependencies · EN / FR
 |---|---|---|
 | **Length** | ~25 s | ~2 min |
 | **Rooms** | 1 fight, 1 chest, 1 dragon | 11 rooms: fights, a genie, a trap, a mid-boss, a final boss |
-| **Goal** | Beat the dragon, get a rank (C → S) | Arcade score, top 5 on the wall |
+| **Goal** | Beat the dragon, get a rank (C → S) | Arcade score, top 5 on the wall of fame |
 | **Controls** | One button: tap, click, Space or Enter | Same, plus 1–4 for answers |
 | **Needs a server?** | No | Yes, every score is replayed server-side |
 
@@ -77,7 +77,7 @@ Reached from the treasure page. Keep the hero from your easy run (weapon and pot
 | Room without taking damage | 300 |
 | On victory: HP left / time bonus | 20 per HP / 20 per second under 150 s |
 
-Dying keeps your points but loses both victory bonuses. The top 5 go on **the wall** with three letters and a class icon, and every finished run gets a share link.
+Dying keeps your points but loses both victory bonuses. The top 5 go on **the wall of fame** with three letters and a class icon ([live at strikwerda.fr/#wall](https://strikwerda.fr/#wall)), and every finished run gets a share link.
 
 ## 🛡️ Why the leaderboard is hard to fake
 
@@ -85,7 +85,7 @@ Dying keeps your points but loses both victory bonuses. The top 5 go on **the wa
 - The browser sends **only its inputs**: tap times in milliseconds and choices. The server **replays the run** with the same engine code and computes the score itself. A score sent by hand is simply ignored.
 - Runs must take at least **90 % of the replayed game time** in real time, tokens are **HMAC-signed and single use**, and starts and finishes are **rate-limited**.
 - A **bot check** flags only near-perfect, zero-variance timing: human hands wobble, a script doesn't. Fast humans are never flagged on speed alone.
-- The wall only shows the top 5: no ranks outside it, no player counts, no dates.
+- The wall of fame shows the top 5 with three letters each. Everyone else only learns their own rank: no other names, no dates.
 
 ## 🧰 How it's built
 

@@ -54,7 +54,7 @@ function renderStats(content, stats, onForget) {
     card(killers.length === 0 ? '–' : killers[0].replace(/ \d+$/, ''), 'deadliest foe', killers.length === 0 ? null : killers.join(' · ')),
     card(hours >= 1 ? `${hours.toFixed(1)} h` : `${Math.round(hours * 60)} min`, 'spent in the Real Dungeon'),
     card(`${count('lang.en')} / ${count('lang.fr')}`, 'English / French picks'),
-    card(compact(stats.wall), 'names carved on the wall', 'the wall shows the best 5'),
+    card(compact(stats.wall), 'names carved on the wall of fame', 'it shows the best 5'),
   );
   const forget = el('button', 'text-button', 'Forget key on this device');
   forget.type = 'button';

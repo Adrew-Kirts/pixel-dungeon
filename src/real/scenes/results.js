@@ -1,4 +1,4 @@
-import { t, heroName, formatNumber } from '../../i18n.js';
+import { t, heroName, formatNumber, rankLabel } from '../../i18n.js';
 import { finalScore } from '../engine.js';
 import { el, append } from '../../ui/dom.js';
 import { renderBoard } from '../../ui/real/board.js';
@@ -144,7 +144,12 @@ export async function showResults(scene, { api, runId, body, alive, storage, onA
   }
   totalValue.textContent = formatNumber(response.score);
   if (response.qualifies !== true) {
-    status.hidden = true;
+    if (Number.isInteger(response.rank) === true) {
+      status.textContent = t('real.rankLine', { rank: rankLabel(response.rank) });
+      status.classList.add('is-ranked');
+    } else {
+      status.hidden = true;
+    }
     showShare(response.score, response.shareId, false, null);
     await showWall();
     again.focus({ preventScroll: true });

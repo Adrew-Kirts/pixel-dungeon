@@ -2685,28 +2685,31 @@ kbd {
 .scroll-hint {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  margin: 14px auto 0;
-  padding: 4px 8px;
-  font-family: var(--sans);
-  font-size: 13px;
-  color: var(--mist);
+  gap: 12px;
+  margin: 18px auto 0;
+  padding: 10px 18px;
+  font-family: var(--pixel);
+  font-size: 16px;
+  color: var(--gold);
   cursor: pointer;
-  background: none;
-  border: 0;
+  background: rgba(254, 174, 52, 0.08);
+  border: 2px solid rgba(254, 174, 52, 0.55);
+  box-shadow: 0 0 16px rgba(254, 174, 52, 0.15);
+  transition: background 150ms, color 150ms;
 }
 
 .scroll-hint:hover {
-  color: var(--cloud);
+  color: var(--gold-light);
+  background: rgba(254, 174, 52, 0.16);
 }
 
 .scroll-arrow {
-  font-size: 10px;
-  animation: scroll-bob 1400ms ease-in-out infinite;
+  font-size: 13px;
+  animation: scroll-bob 1200ms ease-in-out infinite;
 }
 
 .scroll-arrow:last-child {
-  animation-delay: 180ms;
+  animation-delay: 160ms;
 }
 
 @keyframes scroll-bob {
@@ -2765,6 +2768,20 @@ kbd {
 .lang-card .auto-bar {
   width: 100%;
   max-width: 280px;
+}
+
+.lang-hint {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 13px;
+  text-align: center;
+  color: var(--mist);
+  animation: blink 1600ms steps(2, start) infinite;
+}
+
+.lang-option:focus-visible {
+  outline: 3px solid var(--gold-light);
+  outline-offset: 3px;
 }
 
 .text-button {
@@ -3023,4 +3040,26 @@ kbd {
   cursor: pointer;
   background: var(--ink);
   border: 2px solid var(--outline);
+}
+
+
+.results-status.is-ranked {
+  font-family: var(--pixel);
+  font-size: 18px;
+  line-height: 1.35;
+  color: var(--gold);
+}
+
+.wall-section .board {
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.wall-section .board li {
+  font-family: var(--pixel);
+}
+
+.wall-section .board-empty {
+  font-family: var(--pixel);
+  text-align: center;
 }

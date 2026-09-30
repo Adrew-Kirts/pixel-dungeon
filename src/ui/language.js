@@ -1,11 +1,10 @@
 import { applyIcon } from './icons.js';
 
-const PICK_MS = 3200;
+const PICK_MS = 4000;
 
 export function pickLanguage(preselected) {
   const root = document.getElementById('lang-picker');
   const options = [...root.querySelectorAll('[data-lang]')];
-  const fill = root.querySelector('.auto-bar-fill');
   for (const option of options) applyIcon(option.querySelector('.px-icon'), `icon:${option.dataset.flag}`, window.innerHeight <= 500 ? 3 : 4);
   let selected = preselected;
   function render() {
@@ -17,6 +16,8 @@ export function pickLanguage(preselected) {
   }
   render();
   root.hidden = false;
+  options.find((option) => option.dataset.lang === selected)?.focus({ preventScroll: true });
+  const fill = root.querySelector('.auto-bar-fill');
   fill.style.transition = 'none';
   fill.style.transform = 'scaleX(1)';
   void fill.offsetWidth;
@@ -42,6 +43,7 @@ export function pickLanguage(preselected) {
         event.preventDefault();
         selected = selected === 'en' ? 'fr' : 'en';
         render();
+        options.find((option) => option.dataset.lang === selected)?.focus({ preventScroll: true });
       } else if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
         finish(selected);

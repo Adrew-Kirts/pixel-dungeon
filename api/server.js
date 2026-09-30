@@ -170,7 +170,7 @@ export function createServer({ store, secret, now = Date.now, config = {} }) {
         qualifies: qualified,
         createdAt: now(),
       });
-      return [200, { human: true, score: score.total, breakdown: score.lines, seconds: score.seconds, outcome: state.outcome, qualifies: qualified, shareId }];
+      return [200, { human: true, score: score.total, breakdown: score.lines, seconds: score.seconds, outcome: state.outcome, qualifies: qualified, rank: store.rankOf(score.total), shareId }];
     },
     async saveInitials(request, [shareId]) {
       const body = await readJson(request, settings.bodyLimit);

@@ -477,3 +477,9 @@ test('the weak spot lasts five seconds and the crosshair crosses the eye three t
   }
   assert.equal(bullseyeWindows.length >= 3, true);
 });
+
+test('the console Ezra plays the most is the Game Boy', async () => {
+  const { QUESTIONS } = await import('../src/real/content.js');
+  assert.equal(QUESTIONS.console.answer, 'gameboy');
+  assert.ok(QUESTIONS.console.choices.some((choice) => choice.id === 'switch'));
+});

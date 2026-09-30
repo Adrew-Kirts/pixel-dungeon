@@ -85,7 +85,9 @@ const treasure = createTreasure({
   onPlay: () => flow.start({ withBoot: false }),
   onReal: () => realFlow.start({ easy: game.lastEasy }),
   input,
+  api,
 });
+const TREASURE_HASHES = ['#treasure', '#wall'];
 game.seeds = createEasySeeds({
   api,
   fixedSeed: Number.isFinite(seedParam) === true ? seedParam : null,
@@ -173,7 +175,8 @@ document.getElementById('skip').addEventListener('click', (event) => {
   showTreasureNow();
 });
 window.addEventListener('hashchange', () => {
-  if (location.hash === '#treasure' && treasure.visible() === false) showTreasureNow();
+  if (TREASURE_HASHES.includes(location.hash) === true && treasure.visible() === false) showTreasureNow();
+  else if (location.hash === '#wall' && treasure.visible() === true) treasure.show(null, storage.getJson('record'));
 });
 
 function render() {
@@ -226,15 +229,13 @@ async function start() {
     render,
   });
   if (treasure.visible() === true) return;
-  if (location.hash === '#treasure') {
+  if (TREASURE_HASHES.includes(location.hash) === true) {
     treasure.show(null, storage.getJson('record'));
   } else {
     root.classList.add('mode-game');
-    if (storage.get('lang') === null) {
-      setLanguage(await pickLanguage(getLanguage()));
-      applyStaticTranslations();
-      api.event(`lang.${getLanguage()}`);
-    }
+    setLanguage(await pickLanguage(getLanguage()));
+    applyStaticTranslations();
+    api.event(`lang.${getLanguage()}`);
     flow.start({ withBoot: true });
   }
 }

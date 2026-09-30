@@ -49,6 +49,11 @@ export function formatNumber(value) {
   return Math.round(value).toLocaleString(language === 'fr' ? 'fr-FR' : 'en-US');
 }
 
+export function rankLabel(rank) {
+  if (language === 'fr') return rank === 1 ? '1er' : `${formatNumber(rank)}ème`;
+  return `#${formatNumber(rank)}`;
+}
+
 export function heroName(hero) {
   if (language === 'en' || hero.firstName === undefined || hero.epithetIndex === undefined) return hero.name;
   const forms = EPITHETS_FR[hero.epithetIndex];
