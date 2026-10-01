@@ -25,7 +25,9 @@ export function createBackground(sprites) {
   const lightCanvas = document.createElement('canvas');
   const lightContext = lightCanvas.getContext('2d');
 
-  function draw(ctx, view, camX, now, k, hiddenRanges = []) {
+  function draw(ctx, view, camX, now, k, hiddenRanges = [], options = {}) {
+    const pickDecor = options.decor ?? decorFor;
+    const windows = options.windows !== false;
     const { W, H, groundY } = view;
     const tiles = sprites.tiles;
     const firstColumn = Math.floor(camX / 16) - 1;
@@ -34,7 +36,7 @@ export function createBackground(sprites) {
       const x = column * 16 - camX;
       const windowRow = groundY - 64;
       const columnCenter = column * 16 + 8;
-      const hasWindow = hash(column * 977) % 9 === 0 && hiddenRanges.some(([from, to]) => columnCenter >= from - 12 && columnCenter <= to + 12) === false;
+      const hasWindow = windows === true && hash(column * 977) % 9 === 0 && hiddenRanges.some(([from, to]) => columnCenter >= from - 12 && columnCenter <= to + 12) === false;
       for (let y = groundY - 16; y > -16; y -= 16) drawTile(ctx, tiles, hasWindow === true && y === windowRow ? TILE.bricksWindow : TILE.bricks, x, y, k);
       for (let y = groundY; y < H + 16; y += 16) {
         const roll = hash(column * 131 + y * 7) % 9;
@@ -66,7 +68,8 @@ export function createBackground(sprites) {
       const worldX = index * DECOR_SPACING + 36;
       if (hiddenRanges.some(([from, to]) => worldX >= from && worldX <= to) === true) continue;
       const x = worldX - camX;
-      const kind = decorFor(index);
+      const kind = pickDecor(index);
+      if (kind === null) continue;
       const top = groundY - 34;
       if (kind === 'banner') {
         ctx.drawImage(sprites.get(`tile:${TILE.banner}`, 'cutout'), snap(x - 8, k), snap(top - 4, k));

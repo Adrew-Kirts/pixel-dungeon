@@ -205,16 +205,121 @@ export function createAudio(storage, env = globalThis) {
     },
     powerDown: () => tone({ type: 'sawtooth', from: 440, to: 40, ms: 1300, vol: 0.07 }),
     voice: () => tone({ type: 'square', from: 140 + Math.random() * 90, ms: 38, vol: 0.05 }),
+    grunt: () => tone({ type: 'sawtooth', from: 110 + Math.random() * 30, to: 80, ms: 60, vol: 0.06 }),
+    chime: () => melody([1568, 2093, 2637], { type: 'triangle', step: 55, length: 160, vol: 0.06 }),
+    pixie: () => tone({ type: 'triangle', from: 1900 + Math.random() * 500, ms: 26, vol: 0.035 }),
+    door: () => {
+      tone({ type: 'sawtooth', from: 190, to: 120, ms: 420, vol: 0.04 });
+      noise({ ms: 380, vol: 0.06, from: 700, to: 300, type: 'bandpass', q: 4 });
+    },
+    slam: () => {
+      noise({ ms: 260, vol: 0.3, from: 400, to: 60, q: 1 });
+      tone({ type: 'square', from: 90, to: 50, ms: 220, vol: 0.12 });
+    },
+    clang: () => {
+      tone({ type: 'square', from: 1760, to: 1500, ms: 120, vol: 0.08 });
+      tone({ type: 'triangle', from: 2637, ms: 260, vol: 0.07, delay: 10 });
+      noise({ ms: 70, vol: 0.12, from: 5000, to: 2000, type: 'highpass', q: 1 });
+    },
+    block: () => {
+      noise({ ms: 110, vol: 0.2, from: 900, to: 200, q: 1 });
+      tone({ type: 'square', from: 220, to: 150, ms: 90, vol: 0.08 });
+    },
+    shatter: () => {
+      noise({ ms: 420, vol: 0.22, from: 6000, to: 900, type: 'bandpass', q: 1.5 });
+      melody([880, 622, 440], { type: 'square', step: 70, length: 90, vol: 0.06 });
+    },
+    drum: () => {
+      tone({ type: 'sine', from: 150, to: 50, ms: 160, vol: 0.3 });
+      noise({ ms: 60, vol: 0.08, from: 2000, to: 800, q: 1 });
+    },
+    splat: () => {
+      noise({ ms: 520, vol: 0.32, from: 1200, to: 120, q: 0.8 });
+      tone({ type: 'sine', from: 180, to: 40, ms: 380, vol: 0.2 });
+    },
+    flutter: () => noise({ ms: 180, vol: 0.08, from: 300, to: 900, type: 'bandpass', q: 3 }),
+    beep: () => melody([1319, 1760], { type: 'square', step: 70, length: 60, vol: 0.06 }),
+    denied: () => melody([220, 0, 220], { type: 'square', step: 90, length: 80, vol: 0.08 }),
+    slurp: () => noise({ ms: 700, vol: 0.12, from: 500, to: 1500, type: 'bandpass', q: 6 }),
+  };
+
+  let doomNodes = null;
+  const doomTimers = [];
+
+  function clearDoomTimers() {
+    for (const timer of doomTimers.splice(0)) clearTimeout(timer);
+  }
+
+  const doom = {
+    start() {
+      if (doomNodes !== null || ready() === false) return;
+      const now = context.currentTime;
+      const bus = context.createGain();
+      bus.gain.setValueAtTime(0.0001, now);
+      bus.gain.exponentialRampToValueAtTime(0.55, now + 2.4);
+      const filter = context.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 300;
+      filter.Q.value = 7;
+      const lfo = context.createOscillator();
+      lfo.frequency.value = 0.11;
+      const lfoGain = context.createGain();
+      lfoGain.gain.value = 170;
+      lfo.connect(lfoGain).connect(filter.frequency);
+      const voices = [
+        { type: 'sawtooth', frequency: 41.2, vol: 0.1 },
+        { type: 'sawtooth', frequency: 43.6, vol: 0.08 },
+        { type: 'triangle', frequency: 58.3, vol: 0.06 },
+      ].map((voice) => {
+        const oscillator = context.createOscillator();
+        oscillator.type = voice.type;
+        oscillator.frequency.value = voice.frequency;
+        const gain = context.createGain();
+        gain.gain.value = voice.vol;
+        oscillator.connect(gain).connect(filter);
+        oscillator.start(now);
+        return oscillator;
+      });
+      filter.connect(bus).connect(master);
+      lfo.start(now);
+      doomNodes = { bus, oscillators: [...voices, lfo] };
+      const knell = () => {
+        if (doomNodes === null) return;
+        tone({ type: 'sine', from: 311, to: 293, ms: 2600, vol: 0.05, attack: 30 });
+        tone({ type: 'sine', from: 440, to: 415, ms: 2800, vol: 0.03, attack: 40, delay: 40 });
+        doomTimers.push(setTimeout(knell, 4200 + Math.random() * 2600));
+      };
+      const heart = () => {
+        if (doomNodes === null) return;
+        tone({ type: 'sine', from: 70, to: 38, ms: 140, vol: 0.22 });
+        tone({ type: 'sine', from: 62, to: 34, ms: 160, vol: 0.16, delay: 210 });
+        doomTimers.push(setTimeout(heart, 1500));
+      };
+      doomTimers.push(setTimeout(knell, 1200), setTimeout(heart, 2200));
+    },
+    stop() {
+      clearDoomTimers();
+      if (doomNodes === null || context === null) return;
+      const { bus, oscillators } = doomNodes;
+      doomNodes = null;
+      const now = context.currentTime;
+      bus.gain.cancelScheduledValues(now);
+      bus.gain.setValueAtTime(Math.max(0.0001, bus.gain.value), now);
+      bus.gain.exponentialRampToValueAtTime(0.0001, now + 0.9);
+      for (const oscillator of oscillators) oscillator.stop(now + 1);
+    },
   };
 
   return {
     unlock,
     sfx,
+    doom,
     context: () => context,
     muted: () => muted,
     toggleMute() {
       muted = muted === false;
       storage.set('muted', muted === true ? '1' : '0');
+      if (muted === true) doom.stop();
       if (muted === false) unlock();
       return muted;
     },

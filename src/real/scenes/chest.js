@@ -78,13 +78,21 @@ export async function chest(scene, event) {
   if (loot.rarity === 'common') audio.sfx.smug();
   else audio.sfx.item();
   hud.announce(t('announce.roll', { face: loot.face, rarity: t(`rarity.${loot.rarity}`) }));
-  const panel = lootPanel(loot, game);
+  const keep = loot.item !== null && event.keptItem === false ? { item: state.hero.item, same: loot.item.id === state.hero.item.id } : null;
+  const panel = lootPanel(loot, game, keep);
   hud.panel(panel.el);
   await panel.done;
   audio.sfx.select();
   hud.closePanel();
   rays.stop();
-  await scheduler.tween(lootActor, { anchor: world.hero.anchor, dy: -14, alpha: 0.3 }, 360, 'inQuad');
+  if (keep !== null && loot.potion === null) {
+    const point = center(game, lootActor);
+    effects.poof(point.x, point.y);
+    await scheduler.tween(lootActor, { dy: -10, alpha: 0 }, 260, 'inQuad');
+  } else {
+    if (keep !== null) lootActor.key = `icon:${loot.potion.icon}`;
+    await scheduler.tween(lootActor, { anchor: world.hero.anchor, dy: -14, alpha: 0.3 }, 360, 'inQuad');
+  }
   lootActor.visible = false;
   world.hero.hold = itemKey(state.hero.item);
   hud.setItem(state.hero.item);

@@ -19,8 +19,10 @@ mkdir -p "$DIST"
 cp -R assets "$DIST/assets"
 cp -R src "$DIST/src-$VERSION"
 cp styles.css "$DIST/styles.css"
-sed -e "s#src=\"src/main.js\"#src=\"src-$VERSION/main.js\"#" -e "s#href=\"styles.css\"#href=\"styles.css?v=$VERSION\"#" index.html > "$DIST/index.html"
+BUILD="${VERSION:0:7} · $(date +%Y-%m-%d)"
+sed -e "s#src=\"src/main.js\"#src=\"src-$VERSION/main.js\"#" -e "s#href=\"styles.css\"#href=\"styles.css?v=$VERSION\"#" -e "s#<span id=\"build\">dev</span>#<span id=\"build\">$BUILD</span>#" index.html > "$DIST/index.html"
 grep -q "src-$VERSION/main.js" "$DIST/index.html"
+grep -q "<span id=\"build\">$BUILD</span>" "$DIST/index.html"
 if [ "${1:-}" = "--build-only" ]; then
   echo "built $DIST ($VERSION)"
   exit 0

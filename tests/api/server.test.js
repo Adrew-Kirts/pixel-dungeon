@@ -299,3 +299,15 @@ test('a run outside the top 5 learns its rank among all finished runs', async ()
   assert.equal(finish.body.qualifies, false);
   assert.equal(finish.body.rank, 7);
 });
+
+test('funnel and click events are counted, made-up ones are refused', async () => {
+  for (const type of ['visit.first', 'easy.chest', 'easy.boss', 'easy.skip', 'treasure.view', 'click.picto', 'click.github', 'click.linkedin', 'click.repo', 'click.original', 'real.room.1', 'real.room.11', 'real.quit']) {
+    assert.equal((await post('/api/events', { type })).status, 200, type);
+  }
+  for (const type of ['real.room.0', 'real.room.12', 'real.room.1a', 'click.evil']) {
+    assert.equal((await post('/api/events', { type })).status, 422, type);
+  }
+  const counters = store.counters();
+  assert.equal(counters['real.room.11'] >= 1, true);
+  assert.equal(counters['click.github'] >= 1, true);
+});

@@ -74,6 +74,7 @@ export async function roomStart(scene, event, upcoming) {
   const { world, hud, view } = game;
   const stage = scene.stage;
   hud.score.room(t('real.room', { n: event.index + 1, total: scene.state.plan.length }));
+  game.api.event(`real.room.${event.index + 1}`);
   const closed = stage.closeSlits(world.camX);
   for (const x of closed) {
     if (x > -10 && x < view.W + 10) game.effects.dust(x, view.groundY - 9, 8);

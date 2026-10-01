@@ -4,7 +4,7 @@
 
 # ⚔️ Pixel Dungeon
 
-**A 25-second one-button dungeon that doubles as my portfolio,<br>and a 2-minute hard mode with a leaderboard you can't fake.**
+**A 25-second one-button dungeon that doubles as my portfolio,<br>a 2-minute hard mode with a leaderboard you can't fake,<br>and a secret roguelike for the ones who listen to the fairy.**
 
 ### [▶ Play it on strikwerda.fr](https://strikwerda.fr)
 
@@ -14,15 +14,15 @@ Vanilla JS · Canvas 2D · WebAudio · Node 24 · zero dependencies · EN / FR
 
 ---
 
-## Two dungeons
+## Three dungeons
 
-|  | 🗡️ The easy run | 💀 The Real Dungeon |
-|---|---|---|
-| **Length** | ~25 s | ~2 min |
-| **Rooms** | 1 fight, 1 chest, 1 dragon | 11 rooms: fights, a genie, a trap, a mid-boss, a final boss |
-| **Goal** | Beat the dragon, get a rank (C → S) | Arcade score, top 5 on the wall of fame |
-| **Controls** | One button: tap, click, Space or Enter | Same, plus 1–4 for answers |
-| **Needs a server?** | No | Yes, every score is replayed server-side |
+|  | 🗡️ The easy run | 💀 The Real Dungeon | 🧚 The Deep Dungeon |
+|---|---|---|---|
+| **Length** | ~25 s | ~2 min | 4–7 min |
+| **Rooms** | 1 fight, 1 chest, 1 dragon | 11 rooms: fights, a genie, a trap, a mid-boss, a final boss | A map of 13 locations you explore in the order you choose |
+| **Goal** | Beat the dragon, get a rank (C → S) | Arcade score, top 5 on the wall of fame | Survive, top 10 on the wall of legends (ask the fairy) |
+| **Controls** | One button: tap, click, Space or Enter | Same, plus 1–4 for answers | Same, plus number keys for menus |
+| **Needs a server?** | No | Yes, every score is replayed server-side | To save a score, yes (replayed server-side) |
 
 <table>
 <tr>
@@ -79,6 +79,19 @@ Reached from the treasure page. Keep the hero from your easy run (weapon and pot
 
 Dying keeps your points but loses both victory bonuses. The top 5 go on **the wall of fame** with three letters and a class icon ([live at strikwerda.fr/#wall](https://strikwerda.fr/#wall)), and every finished run gets a share link.
 
+## 🧚 The Deep Dungeon
+
+A fairy hangs around the treasure page. Click her if you dare.
+
+- **Pick your challenge:** Normal, Difficult or Try Hard. Difficult and Try Hard make every room deeper down meaner than the last, bosses hit much harder and even PERFECT hits wear your gear (it will break, plan a way back); Try Hard also lets you carry only two potions and keeps the fairy mostly quiet. Higher levels multiply the score and get a badge on the wall.
+- **Build your hero:** four classes (Knight, Rogue, Wizard, Barbarian) with their own perks, a starting weapon, a shield (wizards get magic wards) and a random name you can re-roll.
+- **Explore:** a street of four doors. Rooms stay cleared, so walking back is safe but costs time. One door is locked, one path is a dead end, one leads down to the end.
+- **Everything wears out** except your Wooden Stick and your Pot Lid (or Pointy Hat). PERFECT hits don't wear your weapon, weak hits wear it twice as fast. Loot is yours to take or to leave on the floor and come back for later.
+- **Defend with timing:** a ring closes on you for every incoming hit. Tap as it touches you to PARRY (no damage, next strike ×1.5), a little off to BLOCK. Mashing does not work.
+- **The gold zone is smaller** than in the other modes, wall arrows are back, one room holds fifteen monsters, and there is a mid-boss and a final boss I won't spoil.
+- **Secrets:** be nice to the fairy and she whispers tips. There is more than one easter egg, and not every room is on the map.
+- **Skill over luck:** the map and the loot are the same every run; only the meter, the attack rhythms and the monsters' move picks come from the seed. A balance simulation keeps skilled players alive and random tapping dead.
+
 ## 🛡️ Why the leaderboard is hard to fake
 
 - The **server picks the seed**. Everything random (monsters, meter speed, genie rewards, arrow timing and more) comes from it.
@@ -94,6 +107,7 @@ src/
   easy/engine.js    easy run: seeded, logs every strike, replayable
   real/engine.js    hard mode as a pure state machine: expected(state) → apply(state, input) → events
   real/flow.js      browser side: prompts what the engine expects, animates the events
+  deep/             the Deep Dungeon: engine, rhythm judge, rooms, scenes
   engine/           scheduler, integer-scale view, input, WebAudio sound effects, camera
   stage/ scenes/    canvas world and the animated scenes
   ui/               HTML/CSS HUD over the canvas
@@ -119,7 +133,7 @@ npm test                # all suites, no install needed
 node scripts/dev.mjs    # site + API on http://localhost:8765 (in-memory database)
 ```
 
-`?seed=42` fixes the easy-run seed, `?debug` exposes the game object in the console, `API_DOWN=1 node scripts/dev.mjs` shows how the site behaves when the API is unreachable.
+`?seed=42` fixes the easy-run seed, `?debug` exposes the game object in the console, `?deep&deepseed=7` jumps straight into an offline Deep Dungeon, `API_DOWN=1 node scripts/dev.mjs` shows how the site behaves when the API is unreachable.
 
 ## 🕹️ Where it comes from
 

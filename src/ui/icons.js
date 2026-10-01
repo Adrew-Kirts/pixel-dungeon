@@ -15,12 +15,18 @@ export function iconRect(key) {
     const index = Number(name);
     return { sheet: SHEETS.tiles, x: (index % 12) * 16, y: Math.floor(index / 12) * 16, width: 16, height: 16 };
   }
-  const [x, y, width, height] = ATLAS.icons[name];
+  const found = ATLAS.icons[name];
+  if (found === undefined) return null;
+  const [x, y, width, height] = found;
   return { sheet: SHEETS.sprites, x, y, width, height };
 }
 
 export function applyIcon(element, key, scale) {
   const rect = iconRect(key);
+  if (rect === null) {
+    element.style.backgroundImage = 'none';
+    return;
+  }
   element.style.backgroundImage = `url(${rect.sheet.url})`;
   element.style.backgroundSize = `${rect.sheet.width * scale}px ${rect.sheet.height * scale}px`;
   element.style.backgroundPosition = `${-rect.x * scale}px ${-rect.y * scale}px`;

@@ -1,3 +1,5 @@
+import { DEEP_EN, DEEP_FR } from './deep/strings.js';
+
 export const FEMININE_NAMES = ['Brunhilda', 'Merlina', 'Gwendolyn', 'Ingrid', 'Rowena', 'Elspeth', 'Morwenna', 'Agatha'];
 
 export const EPITHETS_FR = [
@@ -41,6 +43,8 @@ const EN = {
   'loot.potionLine': 'Tastes like cherries and courage.',
   'loot.atk': '+{n} ATK',
   'loot.heal': '+{n} HP',
+  'loot.keep': 'You keep your {kept}. The {found} is weaker, it stays in the chest.',
+  'loot.same': 'Another {item}? You already have one.',
   'victory.cleared': 'Dungeon cleared!',
   'victory.time': 'TIME',
   'victory.strikes': 'STRIKES',
@@ -218,6 +222,10 @@ const EN = {
   'real.line.hp': 'HP left',
   'real.line.time': 'Time bonus',
   'real.leaderboard': 'The wall of fame',
+  'wall.open': 'tap to unroll',
+  'wall.close': 'tap to roll up',
+  'wall.loading': 'Unrolling…',
+  'wall.offline': 'The wall of fame is out of reach right now.',
   'real.emptyBoard': 'Nobody yet. Be the first name on the wall of fame.',
   'real.qualified': 'Your name goes on the wall of fame!',
   'real.initialsHint': 'Tap a letter to change it · hold to scroll',
@@ -316,6 +324,8 @@ const FR = {
   'loot.potionLine': 'Goût cerise et courage.',
   'loot.atk': '+{n} ATQ',
   'loot.heal': '+{n} PV',
+  'loot.keep': 'Tu gardes : {kept}. {found}, c’est moins bien, ça reste dans le coffre.',
+  'loot.same': '{item} ? Tu as déjà la même.',
   'victory.cleared': 'Donjon terminé !',
   'victory.time': 'TEMPS',
   'victory.strikes': 'COUPS',
@@ -332,7 +342,7 @@ const FR = {
   'float.weak': 'FAIBLE',
   'float.enraged': 'ENRAGÉ !',
   'float.glug': 'Glou !',
-  'float.mimic': 'MIMIQUE !',
+  'float.mimic': 'FAUX COFFRE !',
   'float.mimicLoot': '…il crache quand même du butin',
   'float.victory': 'VICTOIRE !',
   'float.wild': '{name} surgit !',
@@ -493,6 +503,10 @@ const FR = {
   'real.line.hp': 'PV restants',
   'real.line.time': 'Bonus de temps',
   'real.leaderboard': 'Le mur de la gloire',
+  'wall.open': 'touche pour dérouler',
+  'wall.close': 'touche pour enrouler',
+  'wall.loading': 'Déroulement…',
+  'wall.offline': 'Le mur de la gloire est injoignable pour le moment.',
   'real.emptyBoard': 'Personne encore. Sois le premier nom sur le mur de la gloire.',
   'real.qualified': 'Ton nom va sur le mur de la gloire !',
   'real.initialsHint': 'Touche une lettre pour la changer · maintiens pour défiler',
@@ -570,4 +584,4 @@ const FR = {
   'q.volunteer.duck': 'Maître-nageur pour canards en plastique',
 };
 
-export const STRINGS = { en: EN, fr: FR };
+export const STRINGS = { en: { ...EN, ...DEEP_EN }, fr: { ...FR, ...DEEP_FR } };

@@ -56,6 +56,7 @@ export function sharePanel({ text, url, title }) {
   }
   const links = shareLinks(text, url);
   grid.append(link('WhatsApp', links.whatsapp), link('X', links.x), link('LinkedIn', links.linkedin), link('Facebook', links.facebook));
+  if (typeof navigator.share === 'function') return grid;
   const copy = el('button', 'btn', t('real.copy'));
   copy.type = 'button';
   copy.addEventListener('click', async () => {

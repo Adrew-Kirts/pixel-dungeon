@@ -21,6 +21,10 @@ import { createRealStage } from './real/stage.js';
 import { createCloseup } from './real/closeup.js';
 import { pickLanguage } from './ui/language.js';
 import { setupStats } from './ui/stats.js';
+import { createDeepFlow } from './deep/flow.js';
+import { createDeepStage } from './deep/stage.js';
+import { renderDeep } from './deep/render.js';
+import { createFairy } from './ui/deep/fairy.js';
 
 window.__dungeonReady = true;
 const root = document.documentElement;
@@ -56,7 +60,8 @@ const game = {
   api,
   mode: 'easy',
   lastEasy: null,
-  real: { stage: createRealStage(), closeup: createCloseup() },
+  real: { stage: createRealStage(), closeup: createCloseup(), scene: null },
+  deep: { stage: createDeepStage(), scene: null },
   world: createWorld(),
   lighting: { darkness: 0.5 },
 };
@@ -66,6 +71,7 @@ if (new URLSearchParams(location.search).has('debug') === true) window.__game = 
 
 let flow = null;
 let realFlow = null;
+let deepFlow = null;
 let failed = false;
 function fail(error) {
   if (failed === true) return;
@@ -73,6 +79,7 @@ function fail(error) {
   console.error(error);
   try {
     if (realFlow !== null) realFlow.cancel();
+    if (deepFlow !== null) deepFlow.cancel();
     flow.skipToTreasure();
   } catch {
     root.classList.add('game-failed');
@@ -82,11 +89,18 @@ window.addEventListener('error', (event) => fail(event.error ?? event.message));
 window.addEventListener('unhandledrejection', (event) => fail(event.reason));
 
 const treasure = createTreasure({
-  onPlay: () => flow.start({ withBoot: false }),
-  onReal: () => realFlow.start({ easy: game.lastEasy }),
+  onPlay: () => {
+    if (deepFlow !== null) deepFlow.cancel();
+    flow.start({ withBoot: false });
+  },
+  onReal: () => {
+    if (deepFlow !== null) deepFlow.cancel();
+    realFlow.start({ easy: game.lastEasy });
+  },
   input,
   api,
 });
+createFairy({ api, audio, storage, onDeep: () => deepFlow.start() });
 const TREASURE_HASHES = ['#treasure', '#wall'];
 game.seeds = createEasySeeds({
   api,
@@ -101,13 +115,19 @@ if (Number.isFinite(seedParam) === true) {
 }
 game.seeds.warm();
 setupStats({ api, storage });
-if (Number.isFinite(seedParam) === false) api.event('visit');
+if (Number.isFinite(seedParam) === false) {
+  api.event('visit');
+  if (storage.get('seen') !== '1') {
+    storage.set('seen', '1');
+    api.event('visit.first');
+  }
+}
 const challengeId = params.get('challenge');
 if (typeof challengeId === 'string' && /^[A-Za-z0-9_-]{6,32}$/.test(challengeId) === true) {
   api
     .result(challengeId)
     .then((result) => {
-      treasure.setChallenge({ initials: result.initials, score: result.score });
+      treasure.setChallenge({ initials: result.initials, score: result.score, mode: result.mode === 'deep' ? 'deep' : 'real' });
       const toast = document.getElementById('toast');
       toast.textContent = treasure.challengeText();
       toast.hidden = false;
@@ -132,7 +152,7 @@ window.addEventListener('resize', resize);
 resize();
 
 input.onIdleTap(() => {
-  if (game.mode !== 'real') scheduler.setSpeed(3);
+  if (game.mode === 'easy') scheduler.setSpeed(3);
 });
 const unlockAudio = () => {
   if (navigator.userActivation !== undefined && navigator.userActivation.isActive === false) return;
@@ -166,7 +186,11 @@ onLanguageChange(() => {
 });
 
 function showTreasureNow() {
+  if (root.classList.contains('mode-game') === true && game.mode === 'easy' && flow !== null) api.event('easy.skip');
+  if (game.real.scene !== null && game.real.scene.state.phase !== 'done') api.event('real.quit');
+  if (deepFlow !== null && deepFlow.running() === true) api.event('deep.quit');
   if (flow === null) treasure.show(null, storage.getJson('record'));
+  else if (deepFlow !== null && deepFlow.active() === true) deepFlow.exit();
   else if (realFlow !== null && realFlow.active() === true) realFlow.exit();
   else flow.skipToTreasure();
 }
@@ -181,6 +205,10 @@ window.addEventListener('hashchange', () => {
 
 function render() {
   if (treasure.visible() === true) return;
+  if (game.mode === 'deep') {
+    renderDeep(ctx, game, view, scheduler.time, performance.now());
+    return;
+  }
   const { k, W, H } = view;
   const sprites = game.sprites;
   const now = scheduler.time;
@@ -218,6 +246,8 @@ async function start() {
   game.background = createBackground(game.sprites);
   flow = createFlow(game, treasure, fail);
   realFlow = createRealFlow(game, { api, treasure, resetStage: flow.resetStage, storage, onError: fail });
+  const deepSeed = Number.parseInt(params.get('deepseed') ?? '', 10);
+  deepFlow = createDeepFlow(game, { api, treasure, resetStage: flow.resetStage, storage, onError: fail, fixedSeed: Number.isFinite(deepSeed) === true ? deepSeed >>> 0 : null });
   startLoop({
     update(realMs, now) {
       const dt = scheduler.update(realMs);
@@ -228,6 +258,13 @@ async function start() {
     },
     render,
   });
+  if (params.has('deep') === true) {
+    if (params.has('lang') === true) setLanguage(params.get('lang') === 'fr' ? 'fr' : 'en');
+    applyStaticTranslations();
+    root.classList.add('mode-game');
+    deepFlow.start();
+    return;
+  }
   if (treasure.visible() === true) return;
   if (TREASURE_HASHES.includes(location.hash) === true) {
     treasure.show(null, storage.getJson('record'));

@@ -18,30 +18,66 @@ export function createTreasure({ onPlay, onReal, input, api }) {
 
   function renderChallenge() {
     challengeBanner.hidden = challenge === null;
-    if (challenge !== null) challengeBanner.textContent = t('challenge.banner', { who: challenge.initials ?? t('challenge.someone'), score: formatNumber(challenge.score) });
+    if (challenge !== null) challengeBanner.textContent = t(challenge.mode === 'deep' ? 'deep.challenge' : 'challenge.banner', { who: challenge.initials ?? t('challenge.someone'), score: formatNumber(challenge.score) });
   }
   onLanguageChange(renderChallenge);
-  const wall = document.getElementById('wall');
-  const wallBoard = wall.querySelector('[data-role="board"]');
-  let wallEntries = null;
+  main.addEventListener('click', (event) => {
+    const link = event.target instanceof Element ? event.target.closest('[data-track]') : null;
+    if (link !== null) api.event(`click.${link.dataset.track}`);
+  });
+  function createScroll(section, mode) {
+    const toggle = section.querySelector('.wall-toggle');
+    const hint = section.querySelector('[data-role="hint"]');
+    const board = section.querySelector('[data-role="board"]');
+    let entries = null;
+    let status = 'idle';
 
-  function renderWall() {
-    wall.hidden = wallEntries === null;
-    if (wallEntries !== null) wallBoard.replaceChildren(renderBoard(wallEntries));
-  }
-  onLanguageChange(renderWall);
+    function render() {
+      const isOpen = section.classList.contains('is-open');
+      toggle.setAttribute('aria-expanded', String(isOpen));
+      hint.textContent = t(isOpen === true ? 'wall.close' : 'wall.open');
+      if (status === 'loading') board.replaceChildren(el('p', 'wall-note', t('wall.loading')));
+      else if (status === 'failed') board.replaceChildren(el('p', 'wall-note', t('wall.offline')));
+      else if (entries !== null) board.replaceChildren(renderBoard(entries, null, mode));
+    }
+    onLanguageChange(render);
 
-  function loadWall() {
-    return api
-      .leaderboard()
-      .then((response) => {
-        wallEntries = Array.isArray(response.entries) === true ? response.entries : null;
-      })
-      .catch(() => {
-        wallEntries = null;
-      })
-      .then(renderWall);
+    function open() {
+      section.classList.add('is-open');
+      status = 'loading';
+      render();
+      return api
+        .leaderboard(mode)
+        .then((response) => {
+          entries = Array.isArray(response.entries) === true ? response.entries : [];
+          status = 'ready';
+        })
+        .catch(() => {
+          status = 'failed';
+        })
+        .then(() => {
+          render();
+          setTimeout(() => {
+            if (section.classList.contains('is-open') === true && root.classList.contains('mode-treasure') === true) section.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+          }, 520);
+        });
+    }
+
+    function close() {
+      section.classList.remove('is-open');
+      render();
+    }
+
+    toggle.addEventListener('click', () => {
+      if (section.classList.contains('is-open') === true) close();
+      else open();
+    });
+    render();
+    return { open, close, section };
   }
+
+  const wall = createScroll(document.getElementById('wall'), 'real');
+
   const lightbox = document.getElementById('lightbox');
   for (const trigger of main.querySelectorAll('[data-lightbox]')) {
     trigger.addEventListener('click', (event) => {
@@ -78,12 +114,16 @@ export function createTreasure({ onPlay, onReal, input, api }) {
       renderBadge(summary, record);
       play.textContent = t(summary === null ? 'treasure.play' : 'treasure.playAgain');
       const wantsWall = location.hash === '#wall';
+      api.event('treasure.view');
       if (location.hash !== '#treasure' && wantsWall === false) history.replaceState(null, '', '#treasure');
       window.scrollTo(0, 0);
       main.focus({ preventScroll: true });
-      loadWall().then(() => {
-        if (wantsWall === true && wall.hidden === false && root.classList.contains('mode-treasure') === true) wall.scrollIntoView({ block: 'start' });
-      });
+      if (wantsWall === true) {
+        wall.section.scrollIntoView({ block: 'center' });
+        wall.open();
+      } else {
+        wall.close();
+      }
     },
     setChallenge(value) {
       challenge = value;

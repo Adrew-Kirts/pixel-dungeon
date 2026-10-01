@@ -23,6 +23,7 @@ export function createActor(overrides = {}) {
     shadow: 7,
     phase: Math.random() * 10,
     pivotY: 0,
+    flip: false,
     ...overrides,
   };
 }
@@ -98,7 +99,8 @@ export function drawActor(ctx, view, actor, sprites, now, k) {
     y -= Math.floor((now / 420 + actor.phase) % 2);
   }
   drawShadow(ctx, view, actor, canvas.width, k);
-  const options = { sx, sy, rot: actor.rot, alpha: actor.alpha, pivotY: actor.pivotY };
+  const flip = actor.flip === true;
+  const options = { sx, sy, rot: flip === true ? -actor.rot : actor.rot, alpha: actor.alpha, pivotY: actor.pivotY, flipX: flip };
   drawSprite(ctx, canvas, x, y, k, options);
   if (actor.flash > 0) {
     const key = typeof actor.key === 'function' ? actor.key(now, actor) : actor.key;
@@ -106,10 +108,12 @@ export function drawActor(ctx, view, actor, sprites, now, k) {
   }
   if (actor.hold !== null && actor.holdAlpha > 0) {
     const item = sprites.get(actor.hold, actor.variant === 'gray' ? 'gray' : 'base');
-    drawSprite(ctx, item, x + actor.holdX * sx, y - actor.holdY, k, {
-      rot: actor.holdRot + actor.rot,
+    const facing = flip === true ? -1 : 1;
+    drawSprite(ctx, item, x + facing * actor.holdX * sx, y - actor.holdY, k, {
+      rot: facing * (actor.holdRot + actor.rot),
       alpha: actor.alpha * actor.holdAlpha,
       pivotY: 3,
+      flipX: flip,
     });
   }
 }

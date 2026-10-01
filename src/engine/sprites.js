@@ -3,6 +3,8 @@ import { ATLAS } from '../art/atlas.js';
 const OUTLINE = [63, 38, 49];
 const GOLD_RAMP = ['#be4a2f', '#f77622', '#feae34', '#fee761', '#fff6d0'];
 const GRAY_RAMP = ['#262b44', '#3a4466', '#5a6988', '#8b9bb4', '#c0cbdc'];
+const SHADOW_RAMP = ['#181425', '#262b44', '#68386c', '#9b4ca3', '#d176d0'];
+const FROST_RAMP = ['#124e89', '#0099db', '#75e3ff', '#b5f1ff', '#ffffff'];
 
 export const TILE = {
   wizard: 84,
@@ -121,6 +123,8 @@ export async function loadSprites() {
     else if (variant === 'flash') canvas = remap(get(key), () => [255, 255, 255]);
     else if (variant === 'gold') canvas = remap(get(key), rampTransform(GOLD_RAMP));
     else if (variant === 'cutout') canvas = cutout(get(key));
+    else if (variant === 'shadow') canvas = remap(get(key), rampTransform(SHADOW_RAMP));
+    else if (variant === 'frost') canvas = remap(get(key), rampTransform(FROST_RAMP));
     else canvas = remap(get(key), rampTransform(GRAY_RAMP));
     cache.set(cacheKey, canvas);
     return canvas;

@@ -64,16 +64,26 @@ function lootEntry(iconName, name, detail) {
 
 const LOOT_AUTO_MS = 3200;
 
-export function lootPanel(loot, { input, scheduler }) {
+export function lootPanel(loot, { input, scheduler }, keep = null) {
   const rarity = RARITIES[loot.rarity];
   const card = el('div', 'panel-card loot');
   card.style.setProperty('--rarity', rarity.color);
   const items = el('div', 'loot-items');
-  if (loot.item !== null) append(items, lootEntry(loot.item.icon, itemName(loot.item), t('loot.atk', { n: loot.item.bonus })));
+  if (keep !== null) {
+    const kept = lootEntry(keep.item.icon, itemName(keep.item), t('loot.atk', { n: keep.item.bonus }));
+    kept.classList.add('is-kept');
+    append(items, kept);
+    if (keep.same === false) {
+      const left = lootEntry(loot.item.icon, itemName(loot.item), t('loot.atk', { n: loot.item.bonus }));
+      left.classList.add('is-left');
+      append(items, left);
+    }
+  } else if (loot.item !== null) append(items, lootEntry(loot.item.icon, itemName(loot.item), t('loot.atk', { n: loot.item.bonus })));
   if (loot.potion !== null) append(items, lootEntry(loot.potion.icon, potionName(loot.potion), t('loot.heal', { n: loot.potion.heal })));
   if (loot.item === null && loot.potion === null) append(items, lootEntry(ITEMS.woodenStick.icon, itemName(ITEMS.woodenStick), t('loot.atk', { n: 0 })));
   let line = itemLine(ITEMS.woodenStick);
-  if (loot.item !== null) line = itemLine(loot.item);
+  if (keep !== null) line = keep.same === true ? t('loot.same', { item: itemName(keep.item) }) : t('loot.keep', { kept: itemName(keep.item), found: itemName(loot.item) });
+  else if (loot.item !== null) line = itemLine(loot.item);
   else if (loot.potion !== null) line = t('loot.potionLine');
   append(
     card,

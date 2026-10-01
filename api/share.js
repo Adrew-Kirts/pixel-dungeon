@@ -11,10 +11,11 @@ export function shareTitle({ score, outcome, initials, foeName }) {
   return `${who} scored ${points} pts before ${foeName} won`;
 }
 
-export function renderSharePage({ shareId, score, outcome, initials, foeName, origin = 'https://strikwerda.fr' }) {
+export function renderSharePage({ shareId, mode = 'real', score, outcome, initials, foeName, origin = 'https://strikwerda.fr' }) {
   const title = escapeHtml(shareTitle({ score, outcome, initials, foeName }));
   const target = `/?challenge=${encodeURIComponent(shareId)}`;
-  const description = escapeHtml(`Can you beat ${score.toLocaleString('en-US')}? A 2-minute pixel dungeon by Ezra.`);
+  const pitch = mode === 'deep' ? 'The Deep Dungeon: a pixel roguelike by Ezra.' : 'A 2-minute pixel dungeon by Ezra.';
+  const description = escapeHtml(`Can you beat ${score.toLocaleString('en-US')}? ${pitch}`);
   return `<!doctype html>
 <html lang="en">
 <head>

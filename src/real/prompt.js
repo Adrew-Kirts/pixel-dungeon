@@ -13,7 +13,7 @@ function whenVisible() {
   });
 }
 
-export async function restartable(scene, attempt) {
+export async function restartable(scene, attempt, { canRestart = () => true } = {}) {
   const { game } = scene;
   let cleanups = [];
   let aborted = false;
@@ -39,7 +39,7 @@ export async function restartable(scene, attempt) {
     let stopWatching = () => {};
     const hidden = new Promise((resolve) => {
       const onChange = () => {
-        if (document.hidden === true) resolve(RESTART);
+        if (document.hidden === true && canRestart() === true) resolve(RESTART);
       };
       document.addEventListener('visibilitychange', onChange);
       stopWatching = () => document.removeEventListener('visibilitychange', onChange);

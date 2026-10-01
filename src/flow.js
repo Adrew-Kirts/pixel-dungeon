@@ -64,10 +64,12 @@ export function createFlow(game, treasure, onError) {
     await introduceMonster(run);
     if ((await battle(game, run, run.monster, world.foe)) === 'lost') return lose(run, current);
     hud.progress(1);
+    if (run.server !== null) game.api.event('easy.chest');
     Object.assign(world.chest, { key: 'tile:89', targetAnchor: 0.66, height: 16, shadow: 7, dx: 0, dy: 0, rot: 0 });
     await walk(game, { enter: [world.chest], ms: 1000 });
     await chestScene(game, run);
     await walk(game, { exit: [world.chest], ms: 1000 });
+    if (run.server !== null) game.api.event('easy.boss');
     await bossIntro(game, run);
     if ((await battle(game, run, run.dragon, world.foe)) === 'lost') return lose(run, current);
     run.stats.endedAt = performance.now();

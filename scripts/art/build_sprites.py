@@ -389,6 +389,8 @@ def build():
     icons['graffiti'] = graffiti_icon()
     from real_art import build_real_icons
     icons.update(build_real_icons(dragon_frame('up', False).crop((1, 2, 17, 18))))
+    from deep_art import build_deep_icons
+    icons.update(build_deep_icons())
     x, y, row_height = 0, 40, 0
     placements = {}
     for name, image in icons.items():

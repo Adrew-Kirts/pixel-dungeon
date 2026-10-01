@@ -12,7 +12,18 @@ export function waitForKeyedChoice(root, { guardMs = 400 } = {}) {
     resolvePromise = resolve;
   });
   const onKey = (event) => {
-    if (event.repeat === true || armedAt === null) return;
+    if (armedAt === null) return;
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      const usable = buttons.filter((candidate) => candidate.disabled === false && candidate.isConnected === true);
+      if (usable.length === 0) return;
+      event.preventDefault();
+      const current = usable.indexOf(document.activeElement);
+      const step = event.key === 'ArrowDown' ? 1 : -1;
+      const next = current === -1 ? (step === 1 ? 0 : usable.length - 1) : (current + step + usable.length) % usable.length;
+      usable[next].focus({ preventScroll: false });
+      return;
+    }
+    if (event.repeat === true) return;
     const button = buttons.find((candidate) => candidate.dataset.key === event.key);
     if (button === undefined) return;
     event.preventDefault();
@@ -21,8 +32,8 @@ export function waitForKeyedChoice(root, { guardMs = 400 } = {}) {
   const armTimer = setTimeout(() => {
     armedAt = performance.now();
     for (const button of buttons) button.disabled = false;
-    const primary = root.querySelector('.btn-primary');
-    if (primary !== null && primary.isConnected === true) primary.focus({ preventScroll: true });
+    const primary = root.querySelector('.btn-primary') ?? buttons.find((candidate) => candidate.disabled === false);
+    if (primary !== undefined && primary !== null && primary.isConnected === true) primary.focus({ preventScroll: true });
   }, guardMs);
   function cleanup() {
     clearTimeout(armTimer);
