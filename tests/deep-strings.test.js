@@ -68,3 +68,12 @@ test('in try hard Lumi only has short cryptic lines', () => {
     assert.ok(STRINGS.en[key].length <= 40, `${key} too long`);
   }
 });
+
+test('the server room line is said on every level, Try Hard included', async () => {
+  const { lumiText } = await import('../src/deep/scenes/common.js');
+  for (const difficulty of ['normal', 'hard', 'tryhard']) {
+    const text = lumiText({ state: { difficulty } }, 'deep.fairy.room.b1');
+    assert.equal(typeof text, 'string', difficulty);
+    assert.ok(text.length > 20, difficulty);
+  }
+});

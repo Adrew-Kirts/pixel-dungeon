@@ -257,3 +257,12 @@ test('a try hard deep run is stored with its difficulty and counted', async () =
   const stats = await get('/api/stats', { authorization: `Bearer ${STATS_KEY}` });
   assert.ok(stats.body.counters['deep.difficulty.tryhard'] >= 1);
 });
+
+test('the wall of legends tells who beat the final boss', () => {
+  const local = createStore(':memory:');
+  local.insertResult({ shareId: 'won1', runId: 'wonrun1', mode: 'deep', score: 900, breakdown: '[]', outcome: 'victory', heroClass: 'knight', heroName: 'Hero', foeName: 'Boss', qualifies: true, createdAt: 1 });
+  local.insertResult({ shareId: 'lost1', runId: 'lostrun1', mode: 'deep', score: 800, breakdown: '[]', outcome: 'gameover', heroClass: 'rogue', heroName: 'Hero', foeName: 'a Rat', qualifies: true, createdAt: 2 });
+  local.setInitials('won1', 'WIN');
+  local.setInitials('lost1', 'RIP');
+  assert.deepEqual(local.leaderboard(10, 'deep').map((row) => [row.initials, row.won]), [['WIN', true], ['RIP', false]]);
+});

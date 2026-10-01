@@ -23,11 +23,13 @@ export function renderBoard(entries, you = null, mode = 'real') {
     icon.setAttribute('aria-label', hero.label);
     let secret = null;
     let level = null;
+    let won = null;
     if (mode === 'deep') {
-      secret = entry.secret === true ? secretMark() : el('span', 'board-secret-empty');
+      secret = entry.secret === true ? secretMark() : ghost(secretMark());
       level = Object.hasOwn(LEVEL_ICONS, entry.difficulty) === true ? levelMark(entry.difficulty) : el('span', 'board-level-empty');
+      won = entry.won === true ? wonMark() : ghost(wonMark());
     }
-    append(row, el('span', 'board-rank', String(entry.rank)), el('span', 'board-initials', entry.initials), el('span', 'board-score', formatNumber(entry.score)), level, secret, icon);
+    append(row, el('span', 'board-rank', String(entry.rank)), el('span', 'board-initials', entry.initials), el('span', 'board-score', formatNumber(entry.score)), level, won, secret, icon);
     if (mode === 'deep') row.classList.add('has-secret-slot');
     if (marked === false && you !== null && entry.initials === you.initials && entry.score === you.score) {
       row.classList.add('is-you');
@@ -40,9 +42,27 @@ export function renderBoard(entries, you = null, mode = 'real') {
   for (const id of Object.keys(LEVEL_ICONS)) {
     if (entries.some((entry) => entry.difficulty === id) === true) legends.push(append(el('p', 'board-legend'), levelMark(id), document.createTextNode(t(`deep.difficulty.${id}`))));
   }
+  legends.push(append(el('p', 'board-legend'), wonMark(), document.createTextNode(t('deep.wonLegend'))));
   if (entries.some((entry) => entry.secret === true) === true) legends.push(append(el('p', 'board-legend'), secretMark(), document.createTextNode(t('deep.secretLegend'))));
+  else legends.push(append(el('p', 'board-legend is-mystery'), ghost(secretMark()), document.createTextNode('???')));
   if (legends.length === 0) return list;
   return append(el('div', 'board-wrap'), list, append(el('div', 'board-legends'), ...legends));
+}
+
+function ghost(mark) {
+  mark.classList.add('is-ghost');
+  mark.setAttribute('aria-label', '???');
+  mark.title = '???';
+  return mark;
+}
+
+function wonMark() {
+  const mark = el('span', 'px-icon board-won');
+  applyIcon(mark, 'icon:bugFixed', 1.5);
+  mark.setAttribute('role', 'img');
+  mark.setAttribute('aria-label', t('deep.wonLegend'));
+  mark.title = t('deep.wonLegend');
+  return mark;
 }
 
 function levelMark(id) {

@@ -1080,26 +1080,32 @@ export const ATLAS = {
       7,
       9
     ],
-    "diffNormal": [
+    "bugFixed": [
       75,
+      418,
+      12,
+      12
+    ],
+    "diffNormal": [
+      87,
       418,
       16,
       16
     ],
     "diffHard": [
-      91,
+      103,
       418,
       16,
       16
     ],
     "diffTryhard": [
-      107,
+      119,
       418,
       16,
       16
     ],
     "secretMark": [
-      123,
+      135,
       418,
       10,
       10

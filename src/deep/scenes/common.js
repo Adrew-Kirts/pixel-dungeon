@@ -140,8 +140,11 @@ export function fairySay(scene, text, minMs = 2600) {
   });
 }
 
+const ALWAYS_SAID = new Set(['deep.fairy.room.b1']);
+
 export function lumiText(scene, key, params = {}) {
   const variant = `${key}.${scene.state.difficulty}`;
+  if (ALWAYS_SAID.has(key) === true) return t(key, params);
   if (scene.state.difficulty === 'hard' && has(variant) === true) return t(variant, params);
   if (scene.state.difficulty !== 'tryhard') return t(key, params);
   const cryptic = `${key}.cryptic`;

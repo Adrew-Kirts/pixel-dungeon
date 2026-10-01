@@ -3334,6 +3334,26 @@ GAMEBOY_SMALL = [
 ]
 
 
+TROPHY = [
+    '............',
+    '...YYYyyy...',
+    '.yyYWYyyEyE.',
+    '.y.YYyyyE.E.',
+    '..yyYyyyEE..',
+    '....YyyE....',
+    '.....yE.....',
+    '.....yE.....',
+    '....YyyE....',
+    '...Uuuuuu...',
+    '..jjjjjjjj..',
+    '............',
+]
+
+
+def bug_fixed():
+    return sprite(TROPHY, 12, 12)
+
+
 def build_deep_icons():
     images = {}
     images['manager'] = manager('idle')
@@ -3443,6 +3463,7 @@ def build_deep_icons():
     images['coffeeTable'] = coffee_table()
     images['laptopBack'] = laptop_back()
     images['gameboySmall'] = sprite(GAMEBOY_SMALL, 7, 9)
+    images['bugFixed'] = bug_fixed()
     images['diffNormal'] = centred(diff_candle())
     images['diffHard'] = centred(diff_skull())
     images['diffTryhard'] = centred(diff_skull_fire())

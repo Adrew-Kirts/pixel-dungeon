@@ -47,7 +47,7 @@ export function createStore(path) {
     ),
     getResult: db.prepare('SELECT * FROM results WHERE share_id = ?'),
     setInitials: db.prepare('UPDATE results SET initials = ? WHERE share_id = ? AND initials IS NULL'),
-    leaderboard: db.prepare('SELECT initials, score, hero_class, secret, difficulty FROM results WHERE initials IS NOT NULL AND mode = ? ORDER BY score DESC, created_at ASC LIMIT ?'),
+    leaderboard: db.prepare('SELECT initials, score, hero_class, secret, difficulty, outcome FROM results WHERE initials IS NOT NULL AND mode = ? ORDER BY score DESC, created_at ASC LIMIT ?'),
     boardCount: db.prepare('SELECT COUNT(*) AS count FROM results WHERE initials IS NOT NULL AND mode = ?'),
     nth: db.prepare('SELECT score FROM results WHERE initials IS NOT NULL AND mode = ? ORDER BY score DESC, created_at ASC LIMIT 1 OFFSET ?'),
     deleteResult: db.prepare('DELETE FROM results WHERE share_id = ?'),
@@ -123,6 +123,7 @@ export function createStore(path) {
         if (mode === 'deep') {
           entry.secret = Number(row.secret) === 1;
           entry.difficulty = row.difficulty;
+          entry.won = row.outcome === 'victory';
         }
         return entry;
       });

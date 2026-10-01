@@ -4501,6 +4501,11 @@ kbd {
     text-align: center;
   }
 
+  .summary-body {
+    align-self: stretch;
+    width: 100%;
+  }
+
   .name-roll,
   .summary-gear {
     justify-content: center;
@@ -4742,11 +4747,29 @@ kbd {
 .board li.has-secret-slot,
 .wall-paper .board li.has-secret-slot,
 .lumi-legends .board li.has-secret-slot {
-  grid-template-columns: 2.5ch 1fr auto 16px 16px 28px;
+  grid-template-columns: 2.5ch 1fr auto 16px 18px 16px 28px;
 }
 
-.board-level {
+.board-level,
+.board-won {
   justify-self: center;
+}
+
+.board .px-icon.is-ghost,
+.board-legend .px-icon.is-ghost {
+  animation: none;
+  filter: grayscale(1) brightness(0.45) contrast(0.8);
+  opacity: 0.55;
+}
+
+.lumi-legends .board-legend .px-icon.is-ghost {
+  filter: grayscale(1) brightness(0.3);
+  opacity: 0.4;
+}
+
+.board-legend.is-mystery {
+  letter-spacing: 0.2em;
+  opacity: 0.8;
 }
 
 .board-legends {
