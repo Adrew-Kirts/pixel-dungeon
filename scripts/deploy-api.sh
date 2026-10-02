@@ -7,7 +7,7 @@ if [ -f "$ROOT/.deploy.env" ]; then . "$ROOT/.deploy.env"; fi
 HOST="${DEPLOY_HOST:?DEPLOY_HOST is not set}"
 APP="/opt/strikwerda-api"
 
-if [ -s "$HOME/.nvm/nvm.sh" ]; then
+if [ -z "${CI:-}" ] && [ -s "$HOME/.nvm/nvm.sh" ]; then
   export NVM_DIR="$HOME/.nvm"
   . "$NVM_DIR/nvm.sh"
   nvm use > /dev/null
