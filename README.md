@@ -117,6 +117,7 @@ tests/              node:test suites, including balance simulations of thousands
 ```
 
 - **No build step, no dependencies.** Plain ES modules served as-is; the deploy script copies them into a content-hashed folder so browsers never mix versions.
+- **CI/CD with GitHub Actions.** Every push runs the tests; a push to `main` deploys the API and the site once approved, through an unprivileged deploy user that can only restart the API container. Rollbacks are one manual run away.
 - **Deterministic engines.** The same seed and inputs always give the same run, in the browser and on the server. The easy engine is replayed too, so a hero carried into the Real Dungeon is verified.
 - **Pixel-perfect rendering.** The canvas runs at a small logical resolution scaled by an integer factor, so pixels stay square on every screen.
 - **Sound without files.** Every effect is synthesized with the WebAudio API.

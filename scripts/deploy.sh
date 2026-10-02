@@ -6,11 +6,13 @@ DEST="/var/www/strikwerda"
 DIST="$ROOT/dist"
 
 cd "$ROOT"
-. "$ROOT/.deploy.env"
-HOST="$DEPLOY_HOST"
-export NVM_DIR="$HOME/.nvm"
-. "$NVM_DIR/nvm.sh"
-nvm use > /dev/null
+if [ -f "$ROOT/.deploy.env" ]; then . "$ROOT/.deploy.env"; fi
+HOST="${DEPLOY_HOST:?DEPLOY_HOST is not set}"
+if [ -s "$HOME/.nvm/nvm.sh" ]; then
+  export NVM_DIR="$HOME/.nvm"
+  . "$NVM_DIR/nvm.sh"
+  nvm use > /dev/null
+fi
 npm test > /dev/null
 
 VERSION="$(cat index.html styles.css $(find src assets -type f | sort) | shasum -a 256 | cut -c1-10)"
@@ -28,7 +30,7 @@ if [ "${1:-}" = "--build-only" ]; then
   exit 0
 fi
 
-ssh "$HOST" "cp -a $DEST /root/strikwerda-backup-\$(date +%Y%m%d-%H%M%S)"
+ssh "$HOST" "mkdir -p ~/backups && cp -a $DEST ~/backups/site-\$(date +%Y%m%d-%H%M%S) && ls -1dt ~/backups/site-* | tail -n +6 | xargs -r rm -rf"
 rsync -rlptz --delete --filter='P src-*' "$DIST/" "$HOST:$DEST/"
 curl -fsS "https://strikwerda.fr/?v=$VERSION" | grep -q "src-$VERSION/main.js"
 curl -fsS -o /dev/null "https://strikwerda.fr/src-$VERSION/main.js"
