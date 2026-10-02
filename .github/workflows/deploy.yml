@@ -61,4 +61,5 @@ jobs:
       - name: Smoke test
         run: |
           curl -fsS -o /dev/null https://strikwerda.fr/
-          curl -fsS https://strikwerda.fr/api/leaderboard?mode=deep | grep -q '"entries"'
+          BOARD="$(curl -fsS 'https://strikwerda.fr/api/leaderboard?mode=deep')"
+          grep -q '"entries"' <<< "$BOARD"

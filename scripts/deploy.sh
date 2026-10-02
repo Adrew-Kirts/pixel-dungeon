@@ -32,6 +32,7 @@ fi
 
 ssh "$HOST" "mkdir -p ~/backups && cp -a $DEST ~/backups/site-\$(date +%Y%m%d-%H%M%S) && ls -1dt ~/backups/site-* | tail -n +6 | xargs -r rm -rf"
 rsync -rlptz --delete --filter='P src-*' "$DIST/" "$HOST:$DEST/"
-curl -fsS "https://strikwerda.fr/?v=$VERSION" | grep -q "src-$VERSION/main.js"
+LIVE="$(curl -fsS "https://strikwerda.fr/?v=$VERSION")"
+grep -q "src-$VERSION/main.js" <<< "$LIVE"
 curl -fsS -o /dev/null "https://strikwerda.fr/src-$VERSION/main.js"
 echo "deployed $VERSION"
