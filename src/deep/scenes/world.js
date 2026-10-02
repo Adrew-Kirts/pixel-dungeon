@@ -253,14 +253,14 @@ async function roomComment(scene, node) {
   const key = scene.friend === true && t(friendKey) !== friendKey ? friendKey : `deep.fairy.room.${node}`;
   const text = lumiText(scene, key);
   if (text !== null && text !== key) await fairySay(scene, text, scene.friend === true ? 3400 : 2600);
-  if (node === 'a2') await offstageGrunt(scene);
+  if (node === 'a2' && scene.state.cleared.includes('mb') === false) await offstageGrunt(scene);
   if (node === 'b1') await powerCut(scene);
 }
 
 async function offstageGrunt(scene) {
   const { game } = scene;
   game.audio.sfx.grunt();
-  await speakAs(scene, t('deep.manager.offstage'), '. .', game.view.W - 6, game.view.groundY - 40, { holdMs: 900, voice: 'grunt' });
+  await speakAs(scene, t('deep.manager.offstage'), t('deep.manager.euh', { name: firstName(scene.state.hero) }), game.view.W - 6, game.view.groundY - 40, { holdMs: 1100, voice: 'grunt' });
 }
 
 async function powerCut(scene) {
