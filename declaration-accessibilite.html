@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Déclaration d'accessibilité — strikwerda.fr</title>
+    <meta name="description" content="Déclaration d'accessibilité du site strikwerda.fr, établie selon le RGAA 4.1." />
+    <link rel="canonical" href="https://strikwerda.fr/declaration-accessibilite.html" />
+    <link rel="icon" type="image/png" href="assets/favicon.png" />
+    <link rel="stylesheet" href="styles-pro.css" />
+  </head>
+  <body>
+    <a class="skip" href="#contenu">Aller au contenu</a>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href="/">Ezra Strikwerda <span>· Poisy</span></a>
+        <nav class="site-nav" aria-label="Navigation principale">
+          <ul><li><a href="/">Accueil</a></li><li><a href="/mentions-legales.html">Mentions légales</a></li></ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="contenu">
+      <div class="wrap narrow">
+        <div class="hero">
+          <h1>Déclaration d'accessibilité</h1>
+          <p class="lede">
+            Ezra Strikwerda s'engage à rendre ce site accessible, conformément à l'article 47
+            de la loi n° 2005-102 du 11 février 2005.
+          </p>
+        </div>
+
+        <div class="callout">
+          <p>
+            Cette déclaration annonce une non-conformité. C'est volontaire : il vaut mieux une
+            déclaration exacte qu'une déclaration flatteuse. Elle sert aussi d'exemple de ce que
+            je rédige pour mes clients.
+          </p>
+        </div>
+      </div>
+
+      <section>
+        <div class="wrap narrow">
+          <h2>État de conformité</h2>
+          <p>
+            <strong>strikwerda.fr est non conforme</strong> au référentiel général d'amélioration
+            de l'accessibilité (RGAA) version 4.1. Aucun audit de conformité complet sur les
+            106 critères n'a encore été mené ; aucun taux de conformité n'est donc annoncé.
+            Annoncer un taux sans l'avoir mesuré n'aurait aucune valeur.
+          </p>
+        </div>
+      </section>
+
+      <section>
+        <div class="wrap narrow">
+          <h2>Contenus non accessibles</h2>
+
+          <h3>Le jeu « Pixel Dungeon »</h3>
+          <p>
+            Le jeu accessible depuis <a href="/jeu.html">la page portfolio</a> n'est pas
+            accessible et ne peut pas l'être de façon satisfaisante. C'est un jeu d'action en
+            temps réel rendu dans un élément <code>canvas</code> : son contenu est exclusivement
+            visuel et sa jouabilité repose sur la vitesse de réaction. L'élément est explicitement
+            masqué aux technologies d'assistance plutôt que restitué de façon trompeuse.
+          </p>
+          <p>
+            <strong>Aucune alternative équivalente n'est proposée.</strong> Le jeu est une
+            démonstration de développement, non un service. Les informations qu'il entoure
+            (projets, liens, parcours) sont accessibles sans y jouer.
+          </p>
+
+          <h3>Sélecteur de langue à délai automatique</h3>
+          <p>
+            La page du jeu propose un choix de langue qui bascule automatiquement après quatre
+            secondes. Cette limite de temps n'est pas suspendable ni désactivable, ce qui
+            contrevient au critère 13.1 du RGAA. Correction prévue au schéma ci-dessous.
+          </p>
+        </div>
+      </section>
+
+      <section>
+        <div class="wrap narrow">
+          <h2>Schéma pluriannuel de mise en accessibilité</h2>
+          <ul>
+            <li>
+              <strong>Premier trimestre 2027</strong> — audit de conformité complet du site
+              hors jeu, sur les 106 critères du RGAA 4.1, selon la méthode officielle. Publication
+              du taux de conformité mesuré et mise à jour de cette déclaration.
+            </li>
+            <li>
+              <strong>Premier trimestre 2027</strong> — suppression de la bascule automatique du
+              sélecteur de langue, remplacée par un choix explicite sans limite de temps.
+            </li>
+            <li>
+              <strong>Au fil des évolutions</strong> — tout nouveau contenu publié hors jeu est
+              testé au clavier et au lecteur d'écran avant mise en ligne.
+            </li>
+            <li>
+              <strong>Hors périmètre</strong> — le jeu reste déclaré non accessible. Il ne fera
+              pas l'objet d'une mise en conformité.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section>
+        <div class="wrap narrow">
+          <h2>Établissement de cette déclaration</h2>
+          <p>Déclaration établie le 14 octobre 2026.</p>
+          <p>Technologies utilisées : HTML, CSS, JavaScript.</p>
+          <p>
+            Vérifications effectuées à ce stade : restitution de l'arbre d'accessibilité,
+            structure des titres, noms accessibles des éléments interactifs, contraste du texte
+            courant, repères de navigation, visibilité de la prise de focus, zoom et affichage
+            mobile. Ces vérifications ne constituent pas un audit RGAA complet.
+          </p>
+        </div>
+      </section>
+
+      <section>
+        <div class="wrap narrow">
+          <h2>Retour d'information et contact</h2>
+          <p>
+            Si vous ne parvenez pas à accéder à un contenu, écrivez à
+            <a href="mailto:contact@strikwerda.fr">contact@strikwerda.fr</a> pour être orienté
+            vers une alternative accessible ou obtenir le contenu sous une autre forme.
+          </p>
+          <h2>Voie de recours</h2>
+          <p>
+            Si vous constatez un défaut d'accessibilité vous empêchant d'accéder à un contenu et
+            que vous n'obtenez pas de réponse satisfaisante, vous pouvez
+            <a href="https://formulaire.defenseurdesdroits.fr/" rel="noopener">écrire au Défenseur des droits</a>,
+            contacter le délégué du Défenseur des droits de votre département, ou envoyer un
+            courrier sans affranchissement à : Défenseur des droits, Libre réponse 71120,
+            75342 Paris CEDEX 07.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <ul>
+          <li><a href="/">Accueil</a></li>
+          <li><a href="/mentions-legales.html">Mentions légales</a></li>
+          <li><a href="/jeu.html">Portfolio</a></li>
+        </ul>
+        <p>Ezra Strikwerda — développeur indépendant, Poisy (Haute-Savoie)</p>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,225 +1,205 @@
 <!doctype html>
-<html lang="en" class="no-js">
+<html lang="fr">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Ezra · Developer based in Annecy</title>
-    <meta name="description" content="Ezra, developer based in Annecy. Beat the dragon in a 25-second pixel dungeon, then grab the treasure: featured projects, GitHub and LinkedIn." />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Accessibilité numérique des sites de collectivités — Ezra Strikwerda, Annecy</title>
+    <meta name="description" content="Audit RGAA, déclaration d'accessibilité et schéma pluriannuel pour les communes et collectivités de Haute-Savoie. Développeur indépendant à Poisy, près d'Annecy." />
     <link rel="canonical" href="https://strikwerda.fr/" />
     <meta name="theme-color" content="#181425" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://strikwerda.fr/" />
-    <meta property="og:title" content="Ezra · Developer based in Annecy" />
-    <meta property="og:description" content="A 25-second pixel dungeon. Random hero, one fight, one chest, one dragon. Then the treasure." />
-    <meta property="og:image" content="https://strikwerda.fr/assets/og.png" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta property="og:title" content="Accessibilité numérique des sites de collectivités" />
+    <meta property="og:description" content="Audit RGAA, déclaration d'accessibilité et schéma pluriannuel pour les communes de Haute-Savoie." />
+    <meta property="og:locale" content="fr_FR" />
     <link rel="icon" type="image/png" href="assets/favicon.png" />
-    <link rel="apple-touch-icon" href="assets/favicon.png" />
-    <link rel="preload" href="assets/fonts/pixelify-sans.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="assets/fonts/tiny5.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles-pro.css" />
     <script>
-      document.documentElement.classList.replace('no-js', 'js');
-      setTimeout(function () {
-        if (window.__dungeonReady !== true) document.documentElement.classList.add('game-failed');
-      }, 6000);
+      // Les liens de défi partagés avant le déplacement du jeu pointent encore vers la racine.
+      if (location.search.includes('challenge=')) location.replace('/jeu.html' + location.search);
     </script>
-    <script type="module" src="src/main.js"></script>
   </head>
   <body>
-    <div id="app" aria-label="Dungeon mini-game">
-      <canvas id="scene" aria-hidden="true"></canvas>
-      <div id="fx" aria-hidden="true"></div>
-      <div id="hud">
-        <div id="hud-top">
-          <ol id="progress" class="progress" aria-label="Dungeon progress" hidden>
-            <li class="progress-step" data-step="fight"><span class="px-icon" data-icon="tile:104"></span><span class="sr-only">Fight</span></li>
-            <li class="progress-step" data-step="chest"><span class="px-icon" data-icon="tile:89"></span><span class="sr-only">Chest</span></li>
-            <li class="progress-step" data-step="boss"><span class="px-icon" data-icon="dragonHead"></span><span class="sr-only">Dragon</span></li>
-            <li class="progress-marker" aria-hidden="true"><span class="px-icon" data-role="marker-icon"></span></li>
-          </ol>
-          <div id="score-hud" class="score-hud" hidden>
-            <span class="score-label" data-i18n="real.score">SCORE</span>
-            <strong class="score-value" data-role="value">0</strong>
-            <span class="score-room" data-role="room"></span>
-          </div>
-          <section id="hero-card" class="card hero-card" hidden>
-            <span class="card-portrait px-icon" data-role="portrait"></span>
-            <div class="card-body">
-              <p class="card-name" data-role="name"></p>
-              <div class="bar bar-hero" data-role="bar">
-                <span class="bar-trail"></span><span class="bar-fill"></span>
-              </div>
-              <p class="card-meta"><span data-role="hp"></span></p>
-            </div>
-            <div class="card-slots">
-              <span class="slot" data-role="item" title="Item"><span class="px-icon"></span><span class="slot-dur" hidden><i></i></span></span>
-              <span class="slot slot-deep" data-role="shield" title="Shield" hidden><span class="px-icon"></span><span class="slot-dur" hidden><i></i></span></span>
-              <span class="slot" data-role="potion" title="Potion"><span class="px-icon"></span></span>
-              <span class="slot slot-deep" data-role="key" title="Keycard" hidden><span class="px-icon"></span></span>
-            </div>
-          </section>
-          <section id="foe-card" class="card foe-card" hidden>
-            <div class="card-body">
-              <p class="card-name" data-role="name"></p>
-              <div class="bar bar-foe" data-role="bar">
-                <span class="bar-trail"></span><span class="bar-fill"></span>
-              </div>
-              <p class="card-meta"><span data-role="hp"></span></p>
-            </div>
-            <span class="card-portrait px-icon" data-role="portrait"></span>
-          </section>
-          <section id="boss-bar" class="boss-bar" hidden>
-            <p class="boss-name"><strong data-role="name"></strong> <span data-role="title"></span></p>
-            <div class="bar bar-boss" data-role="bar">
-              <span class="bar-trail"></span><span class="bar-fill"></span><span class="bar-segments"></span>
-            </div>
-          </section>
-        </div>
-        <div id="banner" class="banner" hidden>
-          <p class="banner-title" data-role="title"></p>
-          <p class="banner-subtitle" data-role="subtitle"></p>
-        </div>
-        <div id="speech" class="speech" hidden aria-live="polite"><p class="speech-name" data-role="name"></p><p class="speech-text" data-role="text"></p></div>
-        <p id="flash-word" class="flash-word" hidden aria-hidden="true"></p>
-        <div id="hint" class="hint" hidden></div>
-        <div id="meter" class="meter" hidden>
-          <div class="meter-track">
-            <span class="meter-zone meter-hit"></span>
-            <span class="meter-zone meter-crit"></span>
-            <span class="meter-marker"></span>
-          </div>
-          <p class="meter-label" data-i18n-html="meter.label">Tap <kbd>Space</kbd> when the marker hits <b>gold</b></p>
-        </div>
-        <div id="panel" class="panel" hidden></div>
-        <p id="fairy-bubble" class="fairy-bubble" hidden aria-live="polite"></p>
+    <a class="skip" href="#contenu">Aller au contenu</a>
+
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href="/">Ezra Strikwerda <span>· Poisy</span></a>
+        <nav class="site-nav" aria-label="Navigation principale">
+          <ul>
+            <li><a href="#prestations">Prestations</a></li>
+            <li><a href="#obligations">Obligations</a></li>
+            <li><a href="#tarifs">Tarifs</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </nav>
       </div>
-      <section id="deep-create" class="deep-create" hidden aria-live="polite">
-        <div class="deep-create-inner" data-role="content"></div>
-      </section>
-      <section id="results" class="results" hidden aria-live="polite">
-        <div class="results-inner" data-role="content"></div>
-      </section>
-      <div id="lang-picker" class="lang-picker" hidden>
-        <div class="lang-card" role="group" aria-label="Language / Langue">
-          <div class="lang-options">
-            <button class="lang-option" type="button" data-lang="en" data-flag="langEN"><span class="px-icon"></span><span class="lang-name">English</span></button>
-            <button class="lang-option" type="button" data-lang="fr" data-flag="langFR"><span class="px-icon"></span><span class="lang-name">Français</span></button>
-          </div>
-          <div class="auto-bar"><span class="auto-bar-fill"></span></div>
-          <p class="lang-hint">Tap a flag to start · Touche un drapeau pour commencer</p>
+    </header>
+
+    <main id="contenu">
+      <div class="wrap">
+        <div class="hero narrow">
+          <h1>L'accessibilité numérique des sites de collectivités</h1>
+          <p class="lede">
+            Audit RGAA, déclaration d'accessibilité et schéma pluriannuel pour les communes
+            et les collectivités. Je suis développeur indépendant et j'habite Poisy, à côté
+            d'Annecy.
+          </p>
+        </div>
+
+        <div class="callout narrow">
+          <p>
+            <strong>Un outil automatique détecte au mieux 40 % des non-conformités.</strong>
+            Le reste demande un audit manuel : navigation au clavier, ordre de tabulation,
+            noms accessibles, restitution par lecteur d'écran. C'est ce qui sépare un score
+            Lighthouse d'une déclaration d'accessibilité opposable.
+          </p>
         </div>
       </div>
-      <div id="boot" class="boot" hidden><pre aria-hidden="true"></pre><p class="boot-skip" data-i18n="boot.skip">tap to skip</p></div>
-      <nav id="corner" class="corner" aria-label="Game controls">
-        <button id="mute" class="corner-button" type="button" aria-pressed="false" aria-label="Mute sound">
-          <svg class="icon-sound" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6h3l4-3v10l-4-3H2z" /><path class="waves" d="M11 5h1v1h1v4h-1v1h-1v-1h1V6h-1z" /></svg>
-          <svg class="icon-muted" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6h3l4-3v10l-4-3H2z" /><path d="M11 6h1v1h1V6h1v1h-1v1h1v1h-1V8h-1v1h-1V8h1V7h-1z" /></svg>
-        </button>
-        <a id="skip" class="corner-button corner-skip" href="#treasure"><span data-i18n="skip">Skip</span> <span aria-hidden="true">▸</span></a>
-      </nav>
-      <p id="announcer" class="sr-only" aria-live="polite"></p>
-    </div>
 
-    <main id="treasure" class="treasure" tabindex="-1">
-      <div class="treasure-inner">
-        <header class="treasure-header">
-          <div class="hoard" aria-hidden="true">
-            <span class="hoard-chest"></span>
-            <span class="hoard-coin c1"></span><span class="hoard-coin c2"></span><span class="hoard-coin c3"></span><span class="hoard-coin c4"></span>
+      <section id="obligations">
+        <div class="wrap narrow">
+          <h2>Ce que la loi demande à une commune</h2>
+          <p>
+            Trois obligations distinctes, qu'on confond souvent. Elles ne se règlent pas de
+            la même façon et ne coûtent pas la même chose.
+          </p>
+          <h3>La déclaration d'accessibilité et le schéma pluriannuel</h3>
+          <p>
+            Décret n° 2019-768 du 24 juillet 2019. Toute commune doit publier une déclaration
+            d'accessibilité indiquant son taux de conformité au RGAA, et un schéma pluriannuel
+            de mise en accessibilité. L'amende est de 2 000 € en dessous de 5 000 habitants et
+            de 20 000 € au-delà. Depuis l'ordonnance du 6 septembre 2023, l'Arcom est compétente
+            et les montants encourus pour l'inaccessibilité elle-même sont plus élevés.
+          </p>
+          <p>
+            Point important et rarement dit : la sanction du décret de 2019 porte sur
+            <em>l'absence de déclaration</em>, pas sur l'inaccessibilité. Déclarer honnêtement
+            « non conforme » accompagné d'un schéma de mise en conformité est légal, peu coûteux,
+            et suffit à lever ce risque-là.
+          </p>
+          <h3>Le délégué à la protection des données</h3>
+          <p>
+            Obligatoire pour toute collectivité, sans seuil de taille : une commune de
+            300 habitants comme une agglomération. La mutualisation via l'EPCI ou le centre de
+            gestion est la solution courante, mais les coordonnées doivent être publiées.
+          </p>
+          <h3>Les mentions légales et l'information des personnes</h3>
+          <p>
+            LCEN pour les mentions légales, RGPD pour la politique de confidentialité. Beaucoup
+            de pages encore en ligne citent la loi de 1978 dans sa version d'avant 2018, sans
+            base légale, sans durée de conservation ni droit à l'effacement.
+          </p>
+        </div>
+      </section>
+
+      <section id="prestations">
+        <div class="wrap">
+          <div class="narrow">
+            <h2>Prestations</h2>
+            <p>
+              Trois formules selon que vous ayez déjà un prestataire pour votre site, ou non.
+            </p>
           </div>
-          <p class="eyebrow" data-i18n="treasure.eyebrow">The treasure</p>
-          <h1 class="treasure-title">Ezra</h1>
-          <p class="treasure-tagline" data-i18n="treasure.tagline">Developer based in Annecy</p>
-          <p class="run-badge" data-role="run-badge" hidden></p>
-          <button id="scroll-hint" class="scroll-hint" type="button" hidden><span class="scroll-arrow" aria-hidden="true">▼</span><span data-i18n="treasure.scrollHint">The real game is waiting below</span><span class="scroll-arrow" aria-hidden="true">▼</span></button>
-        </header>
-
-        <section class="treasure-section" aria-labelledby="featured-title">
-          <h2 id="featured-title" class="section-title" data-i18n="treasure.featured">Featured project</h2>
-          <article class="project-card">
-            <a class="project-media" href="https://picto.strikwerda.fr" target="_blank" rel="noopener" data-track="picto">
-              <img src="assets/picto.webp" width="800" height="450" alt="Picto Planning landing page: the free, open visual planner" loading="lazy" decoding="async" />
-            </a>
-            <div class="project-body">
-              <h3 class="project-title">Picto Planning</h3>
-              <p class="project-text" data-i18n="treasure.pictoText">Free visual schedule builder for autism, ADHD &amp; AAC. 11,500+ ARASAAC pictograms, OBF export, EN/FR/NL.</p>
-              <ul class="tags" aria-label="Built with">
-                <li>Vue 3</li>
-                <li>TypeScript</li>
-                <li>FastAPI</li>
+          <ul class="offers">
+            <li class="offer">
+              <h3>Mise en conformité</h3>
+              <p>Pour une commune qui veut que ce soit réglé.</p>
+              <ul>
+                <li>Audit RGAA sur échantillon représentatif</li>
+                <li>Rédaction de la déclaration d'accessibilité</li>
+                <li>Schéma pluriannuel de mise en accessibilité</li>
+                <li>Mentions légales et politique de confidentialité à jour</li>
+                <li>Publication des coordonnées du DPO</li>
               </ul>
-              <a class="btn btn-primary" href="https://picto.strikwerda.fr" target="_blank" rel="noopener" data-track="picto" data-i18n="treasure.visit">Visit picto.strikwerda.fr ↗</a>
-            </div>
-          </article>
-        </section>
-
-        <section class="treasure-section" aria-labelledby="links-title">
-          <h2 id="links-title" class="section-title" data-i18n="treasure.findMe">Find me</h2>
-          <ul class="link-grid">
-            <li>
-              <a class="link-card" href="https://github.com/Adrew-Kirts" target="_blank" rel="noopener" data-track="github">
-                <svg class="link-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" /></svg>
-                <span class="link-text"><strong>GitHub</strong><small>github.com/Adrew-Kirts</small></span>
-              </a>
+              <span class="price">à partir de 900 € <small>livré sous trois semaines</small></span>
             </li>
-            <li>
-              <a class="link-card" href="https://www.linkedin.com/in/ezra-st/" target="_blank" rel="noopener" data-track="linkedin">
-                <svg class="link-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" /></svg>
-                <span class="link-text"><strong>LinkedIn</strong><small>linkedin.com/in/ezra-st</small></span>
-              </a>
+            <li class="offer">
+              <h3>Rapport pour votre prestataire</h3>
+              <p>Pour une commune dont le site est déjà suivi par une agence.</p>
+              <ul>
+                <li>Audit RGAA complet, critère par critère</li>
+                <li>Liste des corrections, prêtes à transmettre</li>
+                <li>Chaque constat avec sa preuve et sa référence</li>
+                <li>Déclaration rédigée à partir des résultats</li>
+              </ul>
+              <span class="price">à partir de 450 € <small>votre agence applique, je ne la remplace pas</small></span>
+            </li>
+            <li class="offer">
+              <h3>Site complet</h3>
+              <p>Pour une commune sans site, ou avec un site hors d'usage.</p>
+              <ul>
+                <li>Site accessible et conforme dès la mise en ligne</li>
+                <li>Lisible sur téléphone, formulaires compris</li>
+                <li>Déclaration et mentions légales incluses</li>
+                <li>Maintenance annuelle optionnelle</li>
+              </ul>
+              <span class="price">sur devis <small>après un échange sur vos besoins</small></span>
             </li>
           </ul>
-        </section>
-
-        <section class="treasure-section about-game" aria-labelledby="about-title">
-          <h2 id="about-title" class="section-title" data-i18n="treasure.about">About this game</h2>
-          <div class="about-body">
-            <a class="about-thumb" href="assets/console.webp" data-lightbox aria-label="Enlarge the 2023 console version screenshot" data-i18n-attr="aria-label: treasure.consoleEnlarge">
-              <img src="assets/console-thumb.webp" width="260" height="192" alt="The 2023 Java console version: text menu, ASCII art warrior and hero stats" loading="lazy" decoding="async" />
-              <span class="about-thumb-caption" data-i18n="treasure.consoleCaption">2023 · console version</span>
-            </a>
-            <div class="about-text">
-              <p data-i18n="treasure.aboutText">A remaster of my 2023 Java console school project, Dungeons &amp; Dragons: random hero, d6 dice, chest loot and a dragon, rebuilt as a one-button pixel game.</p>
-              <a class="text-link" href="https://github.com/Adrew-Kirts/Dungeons_and_Dragons" target="_blank" rel="noopener" data-track="original" data-i18n="treasure.original">See the original on GitHub ↗</a>
-            </div>
-          </div>
-        </section>
-
-        <p id="challenge" class="challenge" hidden></p>
-        <div class="treasure-actions">
-          <button id="play-again" class="btn btn-primary btn-large" type="button">Play again</button>
-          <button id="real-dungeon" class="btn btn-real" type="button" hidden><span data-i18n="treasure.real">or… ⚔ ENTER THE REAL DUNGEON</span><small data-i18n="treasure.realSub">only 5 names fit on the wall of fame</small></button>
         </div>
+      </section>
 
-        <section id="wall" class="wall-scroll" aria-label="Wall of fame">
-          <button class="wall-rod wall-toggle" type="button" aria-expanded="false" aria-controls="wall-paper"><span class="wall-toggle-label" data-i18n="real.leaderboard">The wall of fame</span><span class="wall-toggle-hint" data-role="hint"></span></button>
-          <div id="wall-paper" class="wall-paper"><div class="wall-paper-inner" data-role="board"></div></div>
-          <div class="wall-rod wall-rod-bottom" aria-hidden="true"></div>
-        </section>
+      <section id="tarifs">
+        <div class="wrap narrow">
+          <h2>Pourquoi les tarifs sont affichés</h2>
+          <p>
+            Parce que le premier réflexe d'une mairie est de se demander si cela demande une
+            délibération. Depuis le 1<sup>er</sup> avril 2026, le seuil de dispense de procédure
+            est de 60 000 € HT : en dessous, vous pouvez signer de gré à gré, sans publicité ni
+            mise en concurrence. Ces montants en sont très loin. Vous devez seulement conserver
+            de quoi justifier votre choix.
+          </p>
+        </div>
+      </section>
 
-        <footer class="treasure-footer">
-          <p data-i18n="treasure.credits">Sprites: Tiny Dungeon by Kenney (CC0) · Fonts: Pixelify Sans &amp; Tiny5 (OFL) · © 2026 Ezra</p>
-          <p><a href="https://github.com/Adrew-Kirts/pixel-dungeon" target="_blank" rel="noopener" data-track="repo" data-i18n="treasure.source">Source code of this site ↗</a> · <button id="lang-switch" class="text-button" type="button" data-i18n="lang.switch">Version française</button></p>
-          <p class="build-tag">build <span id="build">dev</span></p>
-        </footer>
-      </div>
+      <section id="methode">
+        <div class="wrap narrow">
+          <h2>Comment je travaille</h2>
+          <p>
+            L'audit suit la méthode officielle du RGAA 4.1 : 106 critères répartis en
+            13 thématiques, niveaux A et AA, appliqués à un échantillon représentatif de pages.
+            Tests automatiques, semi-automatiques et manuels, y compris avec un lecteur d'écran.
+          </p>
+          <p>
+            Chaque constat est accompagné de sa preuve : la page testée, le critère concerné,
+            ce qui a été vérifié. Un constat qu'on ne peut pas montrer n'est pas un constat.
+          </p>
+          <p>
+            Et je ne promets pas 100 %. Une déclaration honnête vaut mieux qu'une déclaration
+            flatteuse : l'Arcom a déjà relevé le cas d'un service affichant 100 % de conformité
+            alors qu'un audit en mesurait 42 %.
+            <a href="/declaration-accessibilite.html">La déclaration d'accessibilité de ce site</a>
+            est publiée, avec ses non-conformités.
+          </p>
+        </div>
+      </section>
+
+      <section id="contact">
+        <div class="wrap narrow">
+          <h2>Prendre contact</h2>
+          <p>
+            Je peux me déplacer en mairie dans tout le bassin annécien. Dites-moi simplement
+            quand vous appeler.
+          </p>
+          <div class="contact-actions">
+            <a class="btn" href="mailto:contact@strikwerda.fr">contact@strikwerda.fr</a>
+            <a class="btn btn-ghost" href="/jeu.html">Voir mon travail de développeur</a>
+          </div>
+        </div>
+      </section>
     </main>
 
-    <aside id="lumi" class="lumi" hidden>
-      <div class="lumi-bubble" data-role="bubble" hidden></div>
-      <button class="lumi-sprite" type="button" data-role="sprite" data-i18n-attr="aria-label: fairy.label" aria-label="Talk to the fairy"><span class="px-icon"></span></button>
-    </aside>
-
-    <dialog id="stats-dialog" class="stats-dialog" aria-label="Dungeon stats"><form method="dialog" class="stats-close-form"><button class="stats-close" type="submit" aria-label="Close">✕</button></form><div class="stats-inner" data-role="content"></div></dialog>
-
-    <p id="toast" class="toast" role="status" hidden></p>
-
-    <dialog id="lightbox" class="lightbox" aria-label="2023 console version screenshot">
-      <img src="assets/console.webp" width="650" height="800" alt="The 2023 Java console version: text menu, ASCII art warrior and hero stats" loading="lazy" decoding="async" />
-      <form method="dialog"><button class="btn lightbox-close" type="submit" data-i18n="treasure.close">Close</button></form>
-    </dialog>
+    <footer class="site-footer">
+      <div class="wrap">
+        <ul>
+          <li><a href="/mentions-legales.html">Mentions légales</a></li>
+          <li><a href="/declaration-accessibilite.html">Déclaration d'accessibilité</a></li>
+          <li><a href="/jeu.html">Portfolio</a></li>
+          <li><a href="https://github.com/Adrew-Kirts" rel="noopener">GitHub</a></li>
+        </ul>
+        <p>Ezra Strikwerda — développeur indépendant, Poisy (Haute-Savoie)</p>
+      </div>
+    </footer>
   </body>
 </html>

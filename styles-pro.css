@@ -1,0 +1,119 @@
+:root {
+  --ink: #181425;
+  --night: #262b44;
+  --slate: #4a5570;
+  --mist: #6b7894;
+  --line: #d8dde7;
+  --paper: #fbfaf7;
+  --card: #ffffff;
+  --gold: #b8791a;
+  --gold-soft: #fdf3e0;
+  --focus: #1a5fb4;
+  --sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --measure: 68ch;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--ink);
+  color: #fff;
+  padding: 12px 18px;
+  z-index: 10;
+}
+.skip:focus { left: 0; }
+
+a { color: #8a4f00; }
+a:hover { color: var(--ink); }
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.wrap { width: min(100% - 2.5rem, 72rem); margin-inline: auto; }
+.narrow { max-width: var(--measure); }
+
+.site-header {
+  border-bottom: 1px solid var(--line);
+  background: var(--card);
+}
+.site-header .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-block: 1.1rem;
+}
+.brand { font-weight: 700; font-size: 1.1rem; text-decoration: none; color: var(--ink); }
+.brand span { color: var(--mist); font-weight: 400; }
+.site-nav ul { display: flex; flex-wrap: wrap; gap: 1.5rem; list-style: none; margin: 0; padding: 0; }
+.site-nav a { text-decoration: none; }
+.site-nav a:hover, .site-nav a:focus-visible { text-decoration: underline; }
+
+.hero { padding-block: 4rem 3rem; }
+.hero h1 { font-size: clamp(1.9rem, 1.2rem + 2.4vw, 3rem); line-height: 1.15; margin: 0 0 1rem; text-wrap: balance; }
+.lede { font-size: 1.2rem; color: var(--slate); margin: 0 0 2rem; }
+
+.callout {
+  background: var(--gold-soft);
+  border-left: 4px solid var(--gold);
+  padding: 1.25rem 1.5rem;
+  margin-block: 2rem;
+}
+.callout p { margin: 0; }
+.callout p + p { margin-top: .75rem; }
+
+section { padding-block: 3rem; border-top: 1px solid var(--line); }
+section h2 { font-size: clamp(1.4rem, 1.1rem + 1vw, 1.9rem); margin: 0 0 1rem; text-wrap: balance; }
+section h3 { font-size: 1.15rem; margin: 0 0 .5rem; }
+
+.offers { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); margin-top: 2rem; padding: 0; list-style: none; }
+.offer { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 1.5rem; }
+.offer p { margin: 0 0 1rem; color: var(--slate); }
+.offer ul { margin: 0 0 1rem; padding-left: 1.2rem; color: var(--slate); }
+.offer li { margin-bottom: .35rem; }
+.price { font-weight: 700; font-size: 1.05rem; color: var(--ink); display: block; margin-top: auto; }
+.price small { display: block; font-weight: 400; font-size: .9rem; color: var(--mist); }
+
+.facts { list-style: none; margin: 1.5rem 0 0; padding: 0; display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); }
+.facts div { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 1.1rem 1.25rem; }
+.facts dt { color: var(--mist); font-size: .9rem; }
+.facts dd { margin: .25rem 0 0; font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.contact-actions { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1.5rem; }
+.btn {
+  display: inline-block;
+  background: var(--ink);
+  color: #fff;
+  text-decoration: none;
+  padding: .85rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+}
+.btn:hover, .btn:focus-visible { background: var(--night); color: #fff; }
+.btn-ghost { background: transparent; color: var(--ink); border: 2px solid var(--ink); }
+.btn-ghost:hover, .btn-ghost:focus-visible { background: var(--ink); color: #fff; }
+
+.site-footer { border-top: 1px solid var(--line); background: var(--card); padding-block: 2rem; margin-top: 2rem; }
+.site-footer ul { display: flex; flex-wrap: wrap; gap: 1.25rem; list-style: none; margin: 0 0 1rem; padding: 0; }
+.site-footer p { margin: 0; color: var(--mist); font-size: .95rem; }
+
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
