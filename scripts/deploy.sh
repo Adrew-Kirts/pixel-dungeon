@@ -46,8 +46,12 @@ fi
 
 ssh "$HOST" "mkdir -p ~/backups && cp -a $DEST ~/backups/site-\$(date +%Y%m%d-%H%M%S) && ls -1dt ~/backups/site-* | tail -n +6 | xargs -r rm -rf"
 rsync -rlptz --delete --filter='P src-*' "$DIST/" "$HOST:$DEST/"
-curl -fsS "https://strikwerda.fr/?v=$VERSION" | grep -q "src-$VERSION/main.js"
-curl -fsS "https://strikwerda.fr/mentions-legales.html" | grep -q "styles-pro.css?v=$VERSION"
+# Lire la réponse avant de la grepper : `curl | grep -q` ferme le tube au premier
+# match et curl sort en 23. Déjà corrigé une fois, cf. fbdf2e8.
+LIVE="$(curl -fsS "https://strikwerda.fr/?v=$VERSION")"
+grep -q "src-$VERSION/main.js" <<< "$LIVE"
+LEGAL="$(curl -fsS "https://strikwerda.fr/mentions-legales.html")"
+grep -q "styles-pro.css?v=$VERSION" <<< "$LEGAL"
 curl -fsS -o /dev/null "https://strikwerda.fr/src-$VERSION/main.js"
 curl -fsS -o /dev/null "https://strikwerda.fr/declaration-accessibilite.html"
 echo "deployed $VERSION"
