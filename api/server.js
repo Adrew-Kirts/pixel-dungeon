@@ -314,7 +314,7 @@ export function createServer({ store, secret, now = Date.now, config = {} }) {
       else sendJson(response, status, payload);
     } catch (error) {
       if (error instanceof HttpError) {
-        if (url.pathname.startsWith('/r/') && error.status === 404) sendHtml(response, 404, '<!doctype html><title>Not found</title><p>This result does not exist. <a href="/jeu.html">Play the game</a></p>');
+        if (url.pathname.startsWith('/r/') && error.status === 404) sendHtml(response, 404, '<!doctype html><title>Not found</title><p>This result does not exist. <a href="/">Play the game</a></p>');
         else sendJson(response, error.status, { error: error.code });
         return;
       }

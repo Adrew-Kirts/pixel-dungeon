@@ -138,7 +138,7 @@ test('initials must be three capital letters and not blocklisted', () => {
 test('share page escapes content and redirects to the challenge', () => {
   const html = renderSharePage({ shareId: 'AbC123xy', score: 12480, outcome: 'victory', initials: 'EST', heroName: '<script>', foeName: 'THE LEGACY MONOLITH' });
   assert.ok(html.includes('EST scored 12,480 pts'));
-  assert.ok(html.includes('/jeu.html?challenge=AbC123xy'));
+  assert.ok(html.includes('/?challenge=AbC123xy'));
   assert.equal(html.includes('<script>'), false);
 });
 

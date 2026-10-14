@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DEST="/var/www/strikwerda"
 DIST="$ROOT/dist"
-PAGES=(index.html mentions-legales.html declaration-accessibilite.html)
+PAGES=(mentions-legales.html declaration-accessibilite.html)
 
 cd "$ROOT"
 if [ -f "$ROOT/.deploy.env" ]; then . "$ROOT/.deploy.env"; fi
@@ -16,7 +16,7 @@ if [ -z "${CI:-}" ] && [ -s "$HOME/.nvm/nvm.sh" ]; then
 fi
 npm test > /dev/null
 
-VERSION="$(cat jeu.html "${PAGES[@]}" styles.css styles-pro.css $(find src assets -type f | sort) | shasum -a 256 | cut -c1-10)"
+VERSION="$(cat index.html "${PAGES[@]}" styles.css styles-pro.css $(find src assets -type f | sort) | shasum -a 256 | cut -c1-10)"
 rm -rf "$DIST"
 mkdir -p "$DIST"
 cp -R assets "$DIST/assets"
@@ -29,9 +29,9 @@ BUILD="${VERSION:0:7} · $(date +%Y-%m-%d)"
 sed -e "s#src=\"src/main.js\"#src=\"src-$VERSION/main.js\"#" \
     -e "s#href=\"styles.css\"#href=\"styles.css?v=$VERSION\"#" \
     -e "s#<span id=\"build\">dev</span>#<span id=\"build\">$BUILD</span>#" \
-    jeu.html > "$DIST/jeu.html"
-grep -q "src-$VERSION/main.js" "$DIST/jeu.html"
-grep -q "<span id=\"build\">$BUILD</span>" "$DIST/jeu.html"
+    index.html > "$DIST/index.html"
+grep -q "src-$VERSION/main.js" "$DIST/index.html"
+grep -q "<span id=\"build\">$BUILD</span>" "$DIST/index.html"
 
 # Les pages du site : seule la feuille de style est versionnée.
 for page in "${PAGES[@]}"; do
@@ -46,8 +46,8 @@ fi
 
 ssh "$HOST" "mkdir -p ~/backups && cp -a $DEST ~/backups/site-\$(date +%Y%m%d-%H%M%S) && ls -1dt ~/backups/site-* | tail -n +6 | xargs -r rm -rf"
 rsync -rlptz --delete --filter='P src-*' "$DIST/" "$HOST:$DEST/"
-curl -fsS "https://strikwerda.fr/jeu.html?v=$VERSION" | grep -q "src-$VERSION/main.js"
-curl -fsS "https://strikwerda.fr/?v=$VERSION" | grep -q "styles-pro.css?v=$VERSION"
+curl -fsS "https://strikwerda.fr/?v=$VERSION" | grep -q "src-$VERSION/main.js"
+curl -fsS "https://strikwerda.fr/mentions-legales.html" | grep -q "styles-pro.css?v=$VERSION"
 curl -fsS -o /dev/null "https://strikwerda.fr/src-$VERSION/main.js"
 curl -fsS -o /dev/null "https://strikwerda.fr/declaration-accessibilite.html"
 echo "deployed $VERSION"

@@ -13,7 +13,7 @@ export function shareTitle({ score, outcome, initials, foeName }) {
 
 export function renderSharePage({ shareId, mode = 'real', score, outcome, initials, foeName, origin = 'https://strikwerda.fr' }) {
   const title = escapeHtml(shareTitle({ score, outcome, initials, foeName }));
-  const target = `/jeu.html?challenge=${encodeURIComponent(shareId)}`;
+  const target = `/?challenge=${encodeURIComponent(shareId)}`;
   const pitch = mode === 'deep' ? 'The Deep Dungeon: a pixel roguelike by Ezra.' : 'A 2-minute pixel dungeon by Ezra.';
   const description = escapeHtml(`Can you beat ${score.toLocaleString('en-US')}? ${pitch}`);
   return `<!doctype html>
