@@ -1,4 +1,5 @@
 import { test } from 'node:test';
+import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { STRINGS, EPITHETS_FR, FEMININE_NAMES } from '../src/strings.js';
 import { EPITHETS, FIRST_NAMES, DRAGON_TITLES, EPITAPHS } from '../src/content.js';
@@ -12,6 +13,18 @@ test('every English string has a French translation and the same placeholders', 
     assert.equal(Object.hasOwn(STRINGS.fr, key), true, `missing fr: ${key}`);
     const placeholders = (text) => [...text.matchAll(/\{(\w+)\}/g)].map((match) => match[1]).sort();
     assert.deepEqual(placeholders(STRINGS.fr[key]), placeholders(english), `placeholders differ: ${key}`);
+  }
+});
+
+test('every data-i18n key used in the markup exists in STRINGS', () => {
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const keys = new Set();
+  for (const m of html.matchAll(/data-i18n="([^"]+)"/g)) keys.add(m[1]);
+  for (const m of html.matchAll(/data-i18n-attr="[^":]+:\s*([^"]+)"/g)) keys.add(m[1].trim());
+  assert.ok(keys.size > 20, 'expected the markup to carry i18n keys');
+  for (const key of keys) {
+    assert.equal(Object.hasOwn(STRINGS.en, key), true, `markup uses data-i18n="${key}" but STRINGS.en has no such key`);
+    assert.equal(Object.hasOwn(STRINGS.fr, key), true, `markup uses data-i18n="${key}" but STRINGS.fr has no such key`);
   }
 });
 
