@@ -147,7 +147,7 @@ function renderStats(content, stats, onForget) {
       card(percent(count('real.genie.right'), count('real.genie.right') + count('real.genie.wrong')), 'right answers', `${formatNumber(count('real.genie.right'))} right · ${formatNumber(count('real.genie.wrong'))} wrong`),
     ]),
     section('Portfolio clicks', [
-      card(compact(count('click.picto')), 'Picto Planning'),
+      card(compact(count('click.picto')), 'Ezrapicto'),
       card(compact(count('click.github')), 'GitHub'),
       card(compact(count('click.linkedin')), 'LinkedIn'),
       card(compact(count('click.repo')), 'source code', `${compact(count('click.original'))} opened the 2023 original`),
